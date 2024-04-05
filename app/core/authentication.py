@@ -1,5 +1,8 @@
 import os
+import logging
 
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer
@@ -8,7 +11,11 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 
-from app.models.user_oop import UserBase, UserCreate
+from app.core.db_utils import get_db
+
+from app.database.user_orm import User
+
+from app.models.user_oop import UserCreate
 from app.models.token_oop import TokenData
 
 
@@ -22,47 +29,46 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 1
 
 
+def add_user_to_db(db: Session, user_to_add: UserCreate) -> User:
+    db_user = User(
+        email=user_to_add.email,
+        first_name=user_to_add.first_name,
+        last_name=user_to_add.last_name,
+        cpf=user_to_add.cpf,
+        birthdate=user_to_add.birthdate,
+        iduff=user_to_add.iduff,
+        hashed_password=get_password_hash(user_to_add.password),
+    )
+    
+    try:
+        db.add(db_user)
+        db.commit()
+    except SQLAlchemyError as sqlae:
+        logging.error(f"Could not add user to database: {sqlae}")
+        raise sqlae
+    
+    return db_user
+
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password):
     return pwd_context.hash(password)
+        
+        
+def get_user_by_email(db: Session, email: str) -> User | None:
+    user_db = db.query(User).filter(User.email == email).first()
+    return user_db
 
-
-def get_user(db, username: str) -> UserBase:
-    #TODO: conectar com o banco de verdade
-    if username in db:
-        user_dict = db[username]
-        return UserBase(
-            email=user_dict.get("email"),
-            first_name=user_dict.get("first_name"),
-            last_name=user_dict.get("last_name"),
-            cpf=user_dict.get("cpf"),
-            active=user_dict.get("active")
-        )
         
-        
-def get_user_with_password(db, username: str) -> UserCreate:
-    #TODO: conectar com o banco de verdade
-    if username in db:
-        user_dict = db[username]
-        return UserCreate(
-            email=user_dict.get("email"),
-            first_name=user_dict.get("first_name"),
-            last_name=user_dict.get("last_name"),
-            cpf=user_dict.get("cpf"),
-            active=user_dict.get("active"),
-            password=user_dict.get("hashed_password")
-        )
-        
-        
-def authenticate_user(db, username: str, password: str) -> UserCreate:
-    user = get_user_with_password(db, username)
+def authenticate_user(db: Session, username: str, password: str) -> User | None:
+    user = get_user_by_email(db, username)
     if not user:
-        return False
-    if not verify_password(password, user.password):
-        return False
+        return None
+    if not verify_password(password, user.hashed_password):
+        return None
     return user
 
 
@@ -78,7 +84,11 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserBase:
+def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: Annotated[Session, Depends(get_db)]
+) -> User:
+    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -93,18 +103,17 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserBase:
     except JWTError:
         raise credentials_exception
     
-    #TODO: conectar com o banco de verdade
-    from app.security.authentication import fake_users_db
-    user = get_user(fake_users_db, username=token_data.username) 
+    user_db = get_user_by_email(db=db, email=token_data.username) 
      
-    if user is None:
+    if user_db is None:
         raise credentials_exception
-    return user
+    
+    return user_db
 
 
 def get_current_active_user(
-    current_user: Annotated[UserBase, Depends(get_current_user)],
-) -> UserBase:
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
     
     if not current_user.active:
         raise HTTPException(status_code=400, detail="Inactive user")

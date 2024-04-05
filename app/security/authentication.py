@@ -1,14 +1,23 @@
-from datetime import timedelta
+import logging
+
 from typing import Annotated
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from datetime import timedelta
+
+from sqlalchemy.orm import Session
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+from app.database.user_orm import User
 
 from app.models.token_oop import TokenModel
-from app.models.user_oop import UserBase, UserCreate
 from app.models.router_tags import RouterTags
+from app.models.user_oop import UserCreate, UserModel
+
+from app.core.db_utils import get_db
 from app.core.authentication import (
     ACCESS_TOKEN_EXPIRE_DAYS, get_current_active_user, authenticate_user, 
-    create_access_token
+    create_access_token, get_user_by_email, add_user_to_db
 )
 
 
@@ -16,33 +25,14 @@ router = APIRouter(tags=[RouterTags.authentication])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-fake_users_db = {
-    "johndoe@example.com": {
-        "username": "johndoe",
-        "first_name": "John",
-        "last_name": "Doe",
-        "cpf": "123.456.789-10",
-        "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$SWRstZpgNoDupJVUasc/3uEYjUO5GolRDKigrqNRIAK2ubwboM17S",
-        "active": True,
-    },
-    "alice@example.com": {
-        "username": "alice",
-        "cpf": "000.000.000-00",
-        "first_name": "Alice",
-        "last_name": "Wonderson",
-        "email": "alice@example.com",
-        "hashed_password": "$2b$12$e1GbE2BT64udPZmGnwQ/GebfO9Z5FUpc3v8aKP2hJY/WqkhEONgTO",
-        "active": False,
-    },
-}
-
 
 @router.post("/token", response_model=TokenModel)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Annotated[Session, Depends(get_db)],
 ) -> TokenModel:
-    user: UserCreate = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    
+    user: User = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -56,6 +46,25 @@ async def login_for_access_token(
     return TokenModel(access_token=access_token, token_type="bearer")
 
 
-@router.get("/users/me", response_model=UserBase)
-def read_users_me(current_user: Annotated[UserBase, Depends(get_current_active_user)]) -> UserBase:
+@router.post("/users/create", response_model=UserModel)
+def create_user(
+    db: Annotated[Session, Depends(get_db)],
+    user_to_create: UserCreate,
+) -> UserModel:
+    
+    db_user = get_user_by_email(db=db, email=user_to_create.email)
+    
+    if db_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="E-mail already registered."
+        )
+    
+    db_user = add_user_to_db(db=db, user_to_add=user_to_create)
+    
+    return db_user
+
+
+@router.get("/users/me", response_model=UserModel)
+def read_users_me(current_user: Annotated[User, Depends(get_current_active_user)]) -> UserModel:
     return current_user
