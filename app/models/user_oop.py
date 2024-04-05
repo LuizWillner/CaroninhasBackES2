@@ -12,7 +12,7 @@ class UserBase(BaseModel):
     iduff: str | None = None
     
 class UserCreate(UserBase):
-    hashed_password: str    
+    password: str    
 
 class UserModel(UserBase):
     id: int
