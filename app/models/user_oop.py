@@ -1,21 +1,37 @@
 from pydantic import BaseModel
 from datetime import datetime
+from app.models.vehicle_oop import DriverVehicleModel
 
 
-class UserModel(BaseModel):
+class UserBase(BaseModel):
     email: str
     first_name: str
     last_name: str
     cpf: str
-    active: bool
-    
-class UserWithPassword(UserModel):
-    password: str | None = None
-
-class UserExtended(UserModel):
     birthdate: datetime
-    created_at: datetime
     iduff: str | None = None
     
-class UserWithId(UserExtended):
+class UserCreate(UserBase):
+    hashed_password: str    
+
+class UserModel(UserBase):
     id: int
+    active: bool = True
+    created_at: datetime
+    class Config:
+        orm_mode = True
+    
+    
+class DriverBase(BaseModel):
+    license: str
+    
+class DriverCreate(DriverBase):
+    fk_user: int
+    
+class DriverModel(BaseModel):
+    id: int
+    created_at: datetime
+    user: UserModel
+    driver_vehicle: list[DriverVehicleModel] = []
+    class Config:
+        orm_mode = True

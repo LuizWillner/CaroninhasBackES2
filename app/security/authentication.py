@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.models.token_oop import TokenModel
-from app.models.user_oop import UserModel, UserWithPassword
+from app.models.user_oop import UserBase, UserCreate
 from app.models.router_tags import RouterTags
 from app.core.authentication import (
     ACCESS_TOKEN_EXPIRE_DAYS, get_current_active_user, authenticate_user, 
@@ -42,7 +42,7 @@ fake_users_db = {
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> TokenModel:
-    user: UserWithPassword = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    user: UserCreate = authenticate_user(fake_users_db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -56,6 +56,6 @@ async def login_for_access_token(
     return TokenModel(access_token=access_token, token_type="bearer")
 
 
-@router.get("/users/me", response_model=UserModel)
-def read_users_me(current_user: Annotated[UserModel, Depends(get_current_active_user)]) -> UserModel:
+@router.get("/users/me", response_model=UserBase)
+def read_users_me(current_user: Annotated[UserBase, Depends(get_current_active_user)]) -> UserBase:
     return current_user

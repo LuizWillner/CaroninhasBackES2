@@ -10,3 +10,4 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 from app.database.user_orm import *
+from app.database.vehicle_orm import *

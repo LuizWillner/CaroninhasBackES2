@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 
-from app.models.user_oop import UserModel, UserWithPassword
+from app.models.user_oop import UserBase, UserCreate
 from app.models.token_oop import TokenData
 
 
@@ -30,11 +30,11 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_user(db, username: str) -> UserModel:
+def get_user(db, username: str) -> UserBase:
     #TODO: conectar com o banco de verdade
     if username in db:
         user_dict = db[username]
-        return UserModel(
+        return UserBase(
             email=user_dict.get("email"),
             first_name=user_dict.get("first_name"),
             last_name=user_dict.get("last_name"),
@@ -43,11 +43,11 @@ def get_user(db, username: str) -> UserModel:
         )
         
         
-def get_user_with_password(db, username: str) -> UserWithPassword:
+def get_user_with_password(db, username: str) -> UserCreate:
     #TODO: conectar com o banco de verdade
     if username in db:
         user_dict = db[username]
-        return UserWithPassword(
+        return UserCreate(
             email=user_dict.get("email"),
             first_name=user_dict.get("first_name"),
             last_name=user_dict.get("last_name"),
@@ -57,7 +57,7 @@ def get_user_with_password(db, username: str) -> UserWithPassword:
         )
         
         
-def authenticate_user(db, username: str, password: str) -> UserWithPassword:
+def authenticate_user(db, username: str, password: str) -> UserCreate:
     user = get_user_with_password(db, username)
     if not user:
         return False
@@ -78,7 +78,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserModel:
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserBase:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -103,8 +103,8 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserModel
 
 
 def get_current_active_user(
-    current_user: Annotated[UserModel, Depends(get_current_user)],
-) -> UserModel:
+    current_user: Annotated[UserBase, Depends(get_current_user)],
+) -> UserBase:
     
     if not current_user.active:
         raise HTTPException(status_code=400, detail="Inactive user")
