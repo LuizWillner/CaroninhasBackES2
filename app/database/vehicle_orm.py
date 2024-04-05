@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, UniqueConstraint
@@ -11,7 +12,7 @@ class DriverVehicle(Base):
     fk_driver = Column(Integer, ForeignKey("driver.id"), index=True, nullable=False)
     fk_vehicle = Column(Integer, ForeignKey("vehicle.id"), index=True, nullable=False)
     plate = Column(String, index=True, nullable=False, unique=True)
-    created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
+    created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
     
     driver = relationship("Driver", lazy=True, uselist=False, back_populates="driver_vehicle")
     vehicle = relationship("Vehicle", lazy=True, uselist=False, back_populates="driver_vehicle")
@@ -25,7 +26,7 @@ class Vehicle(Base):
     brand = Column(String, index=True, nullable=False, unique=False)
     model = Column(String, index=True, nullable=False, unique=False)
     color = Column(String, index=False, nullable=True, unique=False)
-    created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
+    created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
     
     __table_args__ = (
         UniqueConstraint("type", "brand", "model", "color"),
