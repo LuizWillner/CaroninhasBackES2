@@ -28,7 +28,7 @@ class DriverBase(BaseModel):
 class DriverCreate(DriverBase):
     fk_user: int
     
-class DriverModel(BaseModel):
+class DriverModel(DriverBase):
     id: int
     created_at: datetime
     user: UserModel
