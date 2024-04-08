@@ -66,5 +66,8 @@ def create_user(
 
 
 @router.get("/users/me", response_model=UserModel)
-def read_users_me(current_user: Annotated[User, Depends(get_current_active_user)]) -> UserModel:
+def read_my_user(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+) -> UserModel:
+    
     return current_user
