@@ -14,5 +14,5 @@ app.include_router(authentication.router)
 
 @app.get("/")
 def root():
-    return "This is root"
+    return "This is root teste"
 
