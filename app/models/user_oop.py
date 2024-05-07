@@ -12,15 +12,8 @@ class UserBase(BaseModel):
     iduff: str | None = None
     
 class UserCreate(UserBase):
-    password: str    
-
-class UserModel(UserBase):
-    id: int
-    active: bool = True
-    created_at: datetime
-    class Config:
-        orm_mode = True
-        
+    password: str
+    
 class UserUpdate(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
@@ -28,6 +21,7 @@ class UserUpdate(BaseModel):
     old_password: str | None = None
     new_password: str | None = None
     
+
 class DriverBase(BaseModel):
     license: str
     
@@ -37,7 +31,16 @@ class DriverCreate(DriverBase):
 class DriverModel(DriverBase):
     id: int
     created_at: datetime
-    user: UserModel
     driver_vehicle: list[DriverVehicleModel] = []
     class Config:
         orm_mode = True
+        
+
+class UserModel(UserBase):
+    id: int
+    active: bool = True
+    created_at: datetime
+    driver: DriverModel | None = None
+    class Config:
+        orm_mode = True
+        
