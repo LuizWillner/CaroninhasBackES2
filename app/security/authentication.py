@@ -10,13 +10,14 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from app.database.user_orm import User
 
+from app.models.general_oop import BasicResponse
 from app.models.token_oop import TokenModel
 from app.models.router_tags import RouterTags
 from app.models.user_oop import UserCreate, UserModel
 
 from app.core.db_utils import get_db
 from app.core.authentication import (
-    ACCESS_TOKEN_EXPIRE_DAYS, get_current_active_user, authenticate_user, 
+    ACCESS_TOKEN_EXPIRE_DAYS, change_current_user_info, get_active_user, get_current_active_user, authenticate_user, 
     create_access_token, get_user_by_email, add_user_to_db
 )
 
@@ -32,7 +33,11 @@ async def login_for_access_token(
     db: Annotated[Session, Depends(get_db)],
 ) -> TokenModel:
     
-    user: User = authenticate_user(db, form_data.username, form_data.password)
+    user: User = authenticate_user(
+        username=form_data.username,
+        password=form_data.password,
+        db=db,
+    )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -71,3 +76,25 @@ def read_my_user(
 ) -> UserModel:
     
     return current_user
+
+
+@router.get("/users/{id}", response_model=UserModel)
+def read_user(
+    user: Annotated[User, Depends(get_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)]
+) -> UserModel:
+    
+    return user
+
+
+@router.patch("/users/me", response_model=BasicResponse)
+def update_my_user(
+    updated_user: Annotated[User, Depends(change_current_user_info)]
+)-> BasicResponse:
+    '''
+    Atualiza primeiro nome, último nome, data de nascimento 
+    '''
+    if updated_user:
+        return BasicResponse(
+            response="User updated."
+        )

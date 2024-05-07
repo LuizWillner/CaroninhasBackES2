@@ -1,5 +1,4 @@
 from pydantic import BaseModel
 
-class HTTPBasicResponse(BaseModel):
-    status_code: int
-    detail: str
+class BasicResponse(BaseModel):
+    response: str

@@ -20,7 +20,13 @@ class UserModel(UserBase):
     created_at: datetime
     class Config:
         orm_mode = True
-    
+        
+class UserUpdate(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    birthdate: datetime | None = None
+    old_password: str | None = None
+    new_password: str | None = None
     
 class DriverBase(BaseModel):
     license: str
