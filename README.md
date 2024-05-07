@@ -18,6 +18,9 @@ Projeto da disciplina Engenharia de Software 2 | Back-end | Universidade Federal
 	- No **Windows**:
 		>> `.\.venv/Scripts/activate`
 
+	- No **Linux**:
+		>> `source .venv/bin/activate`
+
 4. Caso esteja no Windows, trocar politica de segurança do Windows, se necessário (executar no powershell como adm)
 	>> `Set-ExecutionPolicy AllSigned`
 
