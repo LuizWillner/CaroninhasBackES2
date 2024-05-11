@@ -23,7 +23,7 @@ Projeto da disciplina Engenharia de Software 2 | Back-end | Universidade Federal
 		>> python3 -m venv .venv
 		```
 
-3. Ativar ambiente virtual. Sempre ativar quando ligar a máquina e iniciar o desenvolvimento
+3. Ativar ambiente virtual. Sempre ativar quando ligar a máquina e iniciar o desenvolvimento.
 
 	- No **Windows**:
 		```shell
@@ -35,18 +35,18 @@ Projeto da disciplina Engenharia de Software 2 | Back-end | Universidade Federal
 		>> source .venv/bin/activate
 		```
 
-4. Caso esteja no Windows, trocar politica de segurança do Windows, se necessário (executar no powershell como adm)
+4. Caso esteja no Windows, trocar politica de segurança do Windows, se necessário (executar comando abaixo no powershell como administrador):
 	```shell
 	>> Set-ExecutionPolicy AllSigned
 	```
 
-5. Instalar dependencies no venv
+5. Instalar dependencies no venv.
 	```shell
 	>> pip install -r requirements.txt
 	```
 
-6. Baixar e instalar o SGBD **PostgreSQL**
-	- No **Windows**, baixar e instalar pelo executável no [site](https://www.postgresql.org/download/windows/)
+6. Baixar e instalar o SGBD **PostgreSQL**.
+	- No **Windows**, baixar e instalar pelo executável no [site](https://www.postgresql.org/download/windows/).
 
 	- No **Ubuntu**, executar os comandos:
 		```shell
@@ -77,7 +77,7 @@ Projeto da disciplina Engenharia de Software 2 | Back-end | Universidade Federal
 	3. Preencher dados da conexão Host: localhost, Porta: 5432 (porta padrão se não foi alterada), Banco de dados: YourDatabaseName, Nome de usuário: postgres (padrão se não foi alterado), Senha: YourPassword.
 	4. Clicar em testar conexão e, caso não haja erros, clicar em concluir
 
-10. **Para usuários do WSL**: No caso de ter instalado o **PostgreSQL no WSL** e o **Dbeaver no Windows**, basta preencher os dados de conexão do Dbeaver como descrito no item acima, como se o PostgreSQL estivesse no Windows (localhost pode ser usados para programas rodando no WSL que podem ser acessado do Windows). Talvez seja somente necessário permitir conexões TCP no WSL2 e reiniciar o postgres através dos comandos (Ubuntu):
+10. **Para usuários do WSL**: No caso de ter instalado o **PostgreSQL no WSL** e o **Dbeaver no Windows**, basta preencher os dados de conexão do Dbeaver da forma descrita no item acima, como se o PostgreSQL estivesse no Windows (localhost pode ser usado para programas rodando no WSL que podem ser acessados do Windows). Talvez seja somente necessário permitir conexões TCP no WSL2 e reiniciar o postgres através dos comandos (Ubuntu):
 	```shell
 	>> sudo ufw allow 5432/tcp  # Deve aparecer algo como "Rules updated" e/ou "Rules updated (v6)"
 	>> sudo service postgresql restar
