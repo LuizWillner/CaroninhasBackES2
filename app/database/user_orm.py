@@ -14,12 +14,14 @@ class User(Base):
     last_name = Column(String, index=False, nullable=False)
     cpf = Column(String, index=True, nullable=False, unique=True)
     iduff = Column(String, index=True, nullable=True, unique=True)
+    phone = Column(String, index=True, nullable=False, unique=True)
     hashed_password = Column(String, index=False, nullable=False)
     birthdate = Column(DateTime, index=False, nullable=False)
     created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
     active = Column(Boolean, index=False, nullable=False, default=True)
     
     motorista = relationship('Motorista', lazy=False, uselist=False, back_populates="user", cascade="all, delete")
+    inscricao_em_caronas = relationship("UserCarona", lazy=True, uselist=True, back_populates="carona")
     
     
 class Motorista(Base):
@@ -31,4 +33,5 @@ class Motorista(Base):
     
     user = relationship('User', lazy=False, uselist=False, back_populates="motorista")
     motorista_veiculo = relationship("MotoristaVeiculo", lazy=True, uselist=True, back_populates="motorista", cascade="all, delete")
+    caronas = relationship("Carona", lazy=True, uselist=True, back_populates="motorista")
     
