@@ -1,4 +1,6 @@
 import enum
 
 class RouterTags(enum.Enum):
-    authentication = "User and Authentication"
+    authentication = "Autentiação e Usuário"
+    motorista_e_veiculos = "Motorista e Veículos"
+    carona = "Carona"

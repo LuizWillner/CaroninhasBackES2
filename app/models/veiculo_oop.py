@@ -13,6 +13,8 @@ class VeiculoModel(VeiculoBase):
     created_at: datetime
     class Config:
         orm_mode = True
+        
+# ===========================================================================
 
 class MotoristaVeiculoModel(BaseModel):
     placa: str
