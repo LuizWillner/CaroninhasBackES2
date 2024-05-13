@@ -5,32 +5,32 @@ from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, UniqueCons
 from database import Base
 
 
-class DriverVehicle(Base):
-    __tablename__ = "driver_vehicle"
+class MotoristaVeiculo(Base):
+    __tablename__ = "motorista_veiculo"
     
     id  = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    fk_driver = Column(Integer, ForeignKey("driver.id_fk_user"), index=True, nullable=False)
-    fk_vehicle = Column(Integer, ForeignKey("vehicle.id"), index=True, nullable=False)
-    plate = Column(String, index=True, nullable=False, unique=True)
+    fk_motorista = Column(Integer, ForeignKey("motorista.id_fk_user"), index=True, nullable=False)
+    fk_veiculo = Column(Integer, ForeignKey("veiculo.id"), index=True, nullable=False)
+    placa = Column(String, index=True, nullable=False, unique=True)
     created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
     
-    driver = relationship("Driver", lazy=True, uselist=False, back_populates="driver_vehicle")
-    vehicle = relationship("Vehicle", lazy=True, uselist=False, back_populates="driver_vehicle")
+    motorista = relationship("Motorista", lazy=True, uselist=False, back_populates="motorista_veiculo")
+    veiculo = relationship("Veiculo", lazy=True, uselist=False, back_populates="motorista_veiculo")
     
 
-class Vehicle(Base):
-    __tablename__ = "vehicle"
+class Veiculo(Base):
+    __tablename__ = "veiculo"
     
     id  = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    type = Column(String, index=True, nullable=False, unique=False)
-    brand = Column(String, index=True, nullable=False, unique=False)
-    model = Column(String, index=True, nullable=False, unique=False)
-    color = Column(String, index=False, nullable=True, unique=False)
+    tipo = Column(String, index=True, nullable=False, unique=False)
+    marca = Column(String, index=True, nullable=False, unique=False)
+    modelo = Column(String, index=True, nullable=False, unique=False)
+    cor = Column(String, index=False, nullable=True, unique=False)
     created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
     
     __table_args__ = (
-        UniqueConstraint("type", "brand", "model", "color"),
+        UniqueConstraint("tipo", "marca", "modelo", "cor"),
     )
     
-    driver_vehicle = relationship("DriverVehicle", lazy=True, uselist=True, back_populates="vehicle")
+    motorista_veiculo = relationship("MotoristaVeiculo", lazy=True, uselist=True, back_populates="veiculo")
     

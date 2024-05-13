@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from app.models.vehicle_oop import DriverVehicleModel
+from app.models.vehicle_oop import MotoristaVeiculoModel
 
 
 class UserBase(BaseModel):
@@ -22,16 +22,15 @@ class UserUpdate(BaseModel):
     new_password: str | None = None
     
 
-class DriverBase(BaseModel):
-    license: str
+class MotoristaBase(BaseModel):
+    num_cnh: str
     
-class DriverCreate(DriverBase):
-    fk_user: int
+class MotoristaCreate(MotoristaBase):
+    id_fk_user: int
     
-class DriverModel(DriverBase):
-    id: int
+class MotoristaModel(MotoristaBase):
     created_at: datetime
-    driver_vehicle: list[DriverVehicleModel] = []
+    motorista_veiculo: list[MotoristaVeiculoModel] = []
     class Config:
         orm_mode = True
         
@@ -40,7 +39,7 @@ class UserModel(UserBase):
     id: int
     active: bool = True
     created_at: datetime
-    driver: DriverModel | None = None
+    motorista: MotoristaModel | None = None
     class Config:
         orm_mode = True
         

@@ -19,16 +19,16 @@ class User(Base):
     created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
     active = Column(Boolean, index=False, nullable=False, default=True)
     
-    driver = relationship('Driver', lazy=False, uselist=False, back_populates="user", cascade="all, delete")
+    motorista = relationship('Motorista', lazy=False, uselist=False, back_populates="user", cascade="all, delete")
     
     
-class Driver(Base):
-    __tablename__ = "driver"
+class Motorista(Base):
+    __tablename__ = "motorista"
     
     id_fk_user = Column(Integer, ForeignKey("user.id"), primary_key=True, index=True, nullable=False, unique=True)
-    license = Column(String, index=True, nullable=False, unique=True)
+    num_cnh = Column(String, index=True, nullable=False, unique=True)
     created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
     
-    user = relationship('User', lazy=False, uselist=False, back_populates="driver")
-    driver_vehicle = relationship("DriverVehicle", lazy=True, uselist=True, back_populates="driver", cascade="all, delete")
+    user = relationship('User', lazy=False, uselist=False, back_populates="motorista")
+    motorista_veiculo = relationship("MotoristaVeiculo", lazy=True, uselist=True, back_populates="motorista", cascade="all, delete")
     

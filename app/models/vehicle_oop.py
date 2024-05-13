@@ -2,21 +2,21 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class VehicleBase(BaseModel):
-    type: str
-    brand: str
-    model: str
-    color: str | None = None
+class VeiculoBase(BaseModel):
+    tipo: str
+    marca: str
+    modelo: str
+    cor: str | None = None
     
-class VehicleModel(VehicleBase):
+class VeiculoModel(VeiculoBase):
     id: int
     created_at: datetime
     class Config:
         orm_mode = True
 
-class DriverVehicleModel(BaseModel):
-    plate: str
+class MotoristaVeiculoModel(BaseModel):
+    placa: str
     created_at: datetime
-    vehicle: VehicleModel
+    veiculo: VeiculoModel
     class Config:
         orm_mode = True
