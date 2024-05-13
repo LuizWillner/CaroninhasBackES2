@@ -9,7 +9,7 @@ class DriverVehicle(Base):
     __tablename__ = "driver_vehicle"
     
     id  = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    fk_driver = Column(Integer, ForeignKey("driver.id"), index=True, nullable=False)
+    fk_driver = Column(Integer, ForeignKey("driver.id_fk_user"), index=True, nullable=False)
     fk_vehicle = Column(Integer, ForeignKey("vehicle.id"), index=True, nullable=False)
     plate = Column(String, index=True, nullable=False, unique=True)
     created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
@@ -33,3 +33,4 @@ class Vehicle(Base):
     )
     
     driver_vehicle = relationship("DriverVehicle", lazy=True, uselist=True, back_populates="vehicle")
+    

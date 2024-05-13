@@ -9,7 +9,7 @@ class User(Base):
     __tablename__ = "user"
     
     id  = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    email = Column(String, index=True, nullable=False)
+    email = Column(String, index=True, nullable=False, unique=True)
     first_name = Column(String, index=False, nullable=False)
     last_name = Column(String, index=False, nullable=False)
     cpf = Column(String, index=True, nullable=False, unique=True)
@@ -25,8 +25,7 @@ class User(Base):
 class Driver(Base):
     __tablename__ = "driver"
     
-    id  = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    fk_user = Column(Integer, ForeignKey("user.id"), index=True, nullable=False, unique=True)
+    id_fk_user = Column(Integer, ForeignKey("user.id"), primary_key=True, index=True, nullable=False, unique=True)
     license = Column(String, index=True, nullable=False, unique=True)
     created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
     
