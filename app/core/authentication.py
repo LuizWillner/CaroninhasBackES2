@@ -38,6 +38,7 @@ def add_user_to_db(db: Session, user_to_add: UserCreate) -> User:
         birthdate=user_to_add.birthdate,
         iduff=user_to_add.iduff,
         hashed_password=get_password_hash(user_to_add.password),
+        phone=user_to_add.phone
     )
     
     try:
