@@ -26,10 +26,10 @@ class UserUpdate(BaseModel):
 # ===========================================================================    
 
 class MotoristaBase(BaseModel):
+    id_fk_user: int
     num_cnh: str
     
 class MotoristaModel(MotoristaBase):
-    id_fk_user: int
     created_at: datetime
     class Config:
         orm_mode = True

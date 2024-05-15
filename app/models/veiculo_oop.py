@@ -16,6 +16,11 @@ class VeiculoModel(VeiculoBase):
         
 # ===========================================================================
 
+class MotoristaVeiculoBase(BaseModel):
+    fk_motorista: int
+    fk_veiculo: int
+    placa: str
+
 class MotoristaVeiculoModel(BaseModel):
     placa: str
     created_at: datetime
