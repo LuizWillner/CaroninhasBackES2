@@ -45,8 +45,9 @@ def add_user_to_db(db: Session, user_to_add: UserCreate) -> User:
         db.add(db_user)
         db.commit()
     except SQLAlchemyError as sqlae:
-        logging.error(f"Could not add user to database: {sqlae}")
-        raise sqlae
+        msg = f"Não foi possível adicionar o usuário ao banco: {sqlae}"
+        logging.error(msg)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
     
     return db_user
 
