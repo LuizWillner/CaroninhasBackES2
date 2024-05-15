@@ -8,7 +8,7 @@ from app.database.user_orm import User
 from app.models.router_tags import RouterTags
 from app.models.user_oop import MotoristaBase, UserModel
 
-from app.core.db_utils import get_db
+from app.utils.db_utils import get_db
 from app.core.motorista import add_motorista_to_db
 from app.core.authentication import get_current_active_user
 

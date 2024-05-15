@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
 
-from app.core.db_utils import get_db
+from app.utils.db_utils import get_db
 
 from app.database.user_orm import User, Motorista
 from app.database.veiculo_orm import MotoristaVeiculo

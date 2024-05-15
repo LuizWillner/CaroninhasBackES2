@@ -11,7 +11,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 
-from app.core.db_utils import get_db
+from app.utils.db_utils import get_db
 
 from app.database.user_orm import User
 

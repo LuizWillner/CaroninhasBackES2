@@ -12,7 +12,7 @@ from app.database.user_orm import Motorista, User
 from app.models.router_tags import RouterTags
 from app.models.veiculo_oop import MotoristaVeiculoBase, VeiculoBase, VeiculoModel
 
-from app.core.db_utils import get_db
+from app.utils.db_utils import get_db
 from app.core.veiculo import add_motorista_veiculo_to_db, add_veiculo_to_db, get_veiculo_by_info, get_motorista_veiculo_of_user
 from app.core.authentication import get_current_active_user
 

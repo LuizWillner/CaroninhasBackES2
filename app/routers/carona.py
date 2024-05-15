@@ -9,7 +9,7 @@ from app.database.veiculo_orm import MotoristaVeiculo
 
 from app.models.carona_oop import CaronaBase, CaronaExtended
 
-from app.core.db_utils import get_db
+from app.utils.db_utils import get_db
 from app.core.carona import add_carona_to_db
 from app.core.motorista import get_current_active_motorista
 from app.core.veiculo import get_motorista_veiculo_of_user
