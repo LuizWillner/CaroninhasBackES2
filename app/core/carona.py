@@ -34,7 +34,8 @@ def add_carona_to_db(
         db.add(db_carona)
         db.commit()
     except SQLAlchemyError as sqlae:
-        logging.error(f"Could not add user to database: {sqlae}")
-        raise sqlae
+        msg = f"Não foi possível adicionar a carona ao banco: {sqlae}"
+        logging.error(msg)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
     
     return db_carona
