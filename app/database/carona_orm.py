@@ -30,8 +30,8 @@ class UserCarona(Base):
     created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())
     
-    carona = relationship("Carona", lazy=True, uselist=False, back_populates="passageiros")
     user = relationship("User", lazy=True, uselist=False, back_populates="inscricao_em_caronas")
+    carona = relationship("Carona", lazy=True, uselist=False, back_populates="passageiros")
     
     __table_args__ = (
         UniqueConstraint("fk_carona", "fk_user"),

@@ -21,7 +21,7 @@ class User(Base):
     active = Column(Boolean, index=False, nullable=False, default=True)
     
     motorista = relationship('Motorista', lazy=False, uselist=False, back_populates="user", cascade="all, delete")
-    inscricao_em_caronas = relationship("UserCarona", lazy=True, uselist=True, back_populates="carona")
+    inscricao_em_caronas = relationship("UserCarona", lazy=True, uselist=True, back_populates="user")
     
     
 class Motorista(Base):
