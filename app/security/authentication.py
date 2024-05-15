@@ -15,7 +15,7 @@ from app.models.token_oop import TokenModel
 from app.models.router_tags import RouterTags
 from app.models.user_oop import UserCreate, UserModel
 
-from app.core.db_utils import get_db
+from app.utils.db_utils import get_db
 from app.core.authentication import (
     ACCESS_TOKEN_EXPIRE_DAYS, change_current_user_info, get_active_user, get_current_active_user, authenticate_user, 
     create_access_token, get_user_by_email, add_user_to_db

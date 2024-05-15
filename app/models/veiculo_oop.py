@@ -13,6 +13,13 @@ class VeiculoModel(VeiculoBase):
     created_at: datetime
     class Config:
         orm_mode = True
+        
+# ===========================================================================
+
+class MotoristaVeiculoBase(BaseModel):
+    fk_motorista: int
+    fk_veiculo: int
+    placa: str
 
 class MotoristaVeiculoModel(BaseModel):
     placa: str

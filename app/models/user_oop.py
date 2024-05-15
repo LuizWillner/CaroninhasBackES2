@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
-from app.models.vehicle_oop import MotoristaVeiculoModel
+from app.models.veiculo_oop import MotoristaVeiculoModel
+# from app.models.carona_oop import CaronaModel
 
 
 class UserBase(BaseModel):
@@ -10,6 +11,7 @@ class UserBase(BaseModel):
     cpf: str
     birthdate: datetime
     iduff: str | None = None
+    phone: str
     
 class UserCreate(UserBase):
     password: str
@@ -20,26 +22,31 @@ class UserUpdate(BaseModel):
     birthdate: datetime | None = None
     old_password: str | None = None
     new_password: str | None = None
-    
+
+# ===========================================================================    
 
 class MotoristaBase(BaseModel):
-    num_cnh: str
-    
-class MotoristaCreate(MotoristaBase):
     id_fk_user: int
+    num_cnh: str
     
 class MotoristaModel(MotoristaBase):
     created_at: datetime
-    motorista_veiculo: list[MotoristaVeiculoModel] = []
     class Config:
         orm_mode = True
-        
+
+class MotoristaWithVeiculos(MotoristaModel):
+    motorista_veiculo: list[MotoristaVeiculoModel] = []
+
+class MotoristaWithUser(MotoristaModel):
+    user: UserBase
+
+# ===========================================================================     
 
 class UserModel(UserBase):
     id: int
     active: bool = True
     created_at: datetime
-    motorista: MotoristaModel | None = None
+    motorista: MotoristaWithVeiculos | None = None
     class Config:
         orm_mode = True
         
