@@ -21,18 +21,3 @@ class Carona(Base):
     passageiros = relationship("UserCarona", lazy=True, uselist=True, back_populates="carona")
     
     
-class UserCarona(Base):
-    __tablename__ = "user_carona"
-    
-    id  = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    fk_carona = Column(Integer, ForeignKey("carona.id"), index=True, nullable=False)
-    fk_user = Column(Integer, ForeignKey("user.id"), index=True, nullable=False)
-    created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())
-    
-    user = relationship("User", lazy=True, uselist=False, back_populates="inscricao_em_caronas")
-    carona = relationship("Carona", lazy=True, uselist=False, back_populates="passageiros")
-    
-    __table_args__ = (
-        UniqueConstraint("fk_carona", "fk_user"),
-    )

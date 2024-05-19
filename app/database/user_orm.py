@@ -35,3 +35,4 @@ class Motorista(Base):
     motorista_veiculo = relationship("MotoristaVeiculo", lazy=True, uselist=True, back_populates="motorista", cascade="all, delete")
     caronas = relationship("Carona", lazy=True, uselist=True, back_populates="motorista")
     
+    

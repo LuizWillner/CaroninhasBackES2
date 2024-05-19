@@ -39,3 +39,9 @@ def add_carona_to_db(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
     
     return db_carona
+
+def get_carona_by_id(db: Session, carona_id: int) -> Carona:
+    carona = db.query(Carona).filter(Carona.id == carona_id).first()
+    if not carona:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Carona not found")
+    return carona
