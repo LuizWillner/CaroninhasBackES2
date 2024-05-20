@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Annotated
 from sqlalchemy.orm import Session
 from app.database.pedido_carona_orm import PedidoCarona
+from pydantic import BaseModel
 
 from datetime import datetime
 from app.models.pedido_carona_oop import PedidoCaronaBase, PedidoCaronaCreate, PedidoCaronaUpdate, PedidoCaronaExtended
@@ -68,7 +69,10 @@ def update_pedido_carona(
 ) -> PedidoCaronaExtended:
     return update_pedido_carona_in_db(db=db, pedido_carona_id=pedido_carona_id, pedido_carona=pedido_carona)
 
-@router.delete("/{pedido_carona_id}", response_model=PedidoCaronaExtended)
+class DeletePedidoCaronaResponse(BaseModel):
+    message: str
+
+@router.delete("/{pedido_carona_id}", response_model=DeletePedidoCaronaResponse)
 def delete_pedido_carona(
     pedido_carona_id: int,
     db: Annotated[Session, Depends(get_db)]
