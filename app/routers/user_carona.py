@@ -1,9 +1,10 @@
 from app.database.user_orm import User
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Annotated
 from sqlalchemy.orm import Session
 
 from datetime import datetime
+from app.database.user_carona_orm import UserCarona
 from app.models.user_carona_oop import UserCaronaBase, UserCaronaCreate, UserCaronaUpdate, UserCaronaExtended
 from app.utils.db_utils import get_db
 from app.core.user_carona import (
@@ -70,3 +71,11 @@ def delete_user_carona(
     db: Annotated[Session, Depends(get_db)]
 ) -> UserCaronaExtended:
     return delete_user_carona_from_db(db=db, user_carona_id=user_carona_id)
+
+@router.get("", response_model=list[UserCaronaExtended])
+def search_caronas_historico(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db)
+) -> list[UserCaronaExtended]:
+    caronas = db.query(UserCarona).filter(UserCarona.fk_user == current_user.id).all()
+    return caronas
