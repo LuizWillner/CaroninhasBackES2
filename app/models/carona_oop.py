@@ -20,7 +20,7 @@ class CaronaModel(CaronaBase):
 class UserCaronaModel(BaseModel):
     id: int
     created_at: datetime
-    updated_at: datetime
+    #updated_at: datetime
     
 class UserCaronaWithUser(UserCaronaModel):
     user: UserModel
