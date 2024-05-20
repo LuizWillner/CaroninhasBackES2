@@ -22,6 +22,7 @@ class User(Base):
     
     motorista = relationship('Motorista', lazy=False, uselist=False, back_populates="user", cascade="all, delete")
     inscricao_em_caronas = relationship("UserCarona", lazy=True, uselist=True, back_populates="user")
+    pedido_em_caronas = relationship("PedidoCarona", lazy=True, uselist=True, back_populates="user")
     
     
 class Motorista(Base):

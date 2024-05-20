@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from dotenv import load_dotenv
 
 from app.security import authentication
-from app.routers import hello_world
+from app.routers import hello_world, pedido_carona
 from app.routers import carona
 from app.routers import motorista
 from app.routers import veiculo
@@ -18,6 +18,7 @@ app.include_router(carona.router)
 app.include_router(motorista.router)
 app.include_router(veiculo.router)
 app.include_router(user_carona.router)
+app.include_router(pedido_carona.router)
 
 
 @app.get("/ping")
