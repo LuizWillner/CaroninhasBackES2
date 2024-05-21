@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import List, Annotated, Optional
 
 from app.core.motorista import get_current_active_motorista
+from app.database.veiculo_orm import MotoristaVeiculo
 from app.models.user_oop import UserModel
 from app.utils.veiculo_utils import TipoVeiculo, MarcaVeiculo, Cor
 
@@ -111,19 +112,12 @@ def add_veiculo_to_me(
 
 @router.get("/me", response_model=MotoristaVeiculoExtended)
 def read_my_veiculo_by_placa(
-    placa: str,
-    current_motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
-    db: Annotated[Session, Depends(get_db)],
+    db_motorista_veiculo: Annotated[MotoristaVeiculo, Depends(get_motorista_veiculo_of_user_by_placa)]
 ) -> MotoristaVeiculoExtended:
     '''
     - Procura pelo veículo de placa {_placa_} do usuário atual
     - Retorna informações do veículo
     '''
-    db_motorista_veiculo = get_motorista_veiculo_of_user_by_placa(
-        placa=placa,
-        motorista=current_motorista,
-        db=db
-    )
     if not db_motorista_veiculo:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -134,15 +128,10 @@ def read_my_veiculo_by_placa(
 
 @router.get("/me/all", response_model=list[MotoristaVeiculoExtended])
 def read_all_my_veiculos(
-    current_motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
-    db: Annotated[Session, Depends(get_db)],
+    all_motorista_veiculo: Annotated[list[MotoristaVeiculo], Depends(get_all_motorista_veiculo_of_user)],
 ) -> list[MotoristaVeiculoExtended]:
     '''
     - Procura por todos os veículos do usuário atual
     - Retorna informações dos veículos
     '''
-    all_motorista_veiculo = get_all_motorista_veiculo_of_user(
-        motorista=current_motorista,
-        db=db
-    ) 
     return all_motorista_veiculo
