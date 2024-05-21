@@ -81,7 +81,7 @@ def add_motorista_veiculo_to_db(
 
 def get_motorista_veiculo_of_user(
     veiculo_id: int,
-    motorista: Annotated[Motorista, Depends(get_current_active_motorista)],  #TODO
+    motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
     db: Annotated[Session, Depends(get_db)]
 ) -> MotoristaVeiculo:
     motorista_veiculo: MotoristaVeiculo = (
