@@ -10,7 +10,7 @@ from app.database.veiculo_orm import MotoristaVeiculo
 from app.models.carona_oop import CaronaBase, CaronaExtended, CaronaUpdate
 
 from app.utils.db_utils import get_db
-from app.core.carona import add_carona_to_db, get_carona_by_id, update_carona_in_db
+from app.core.carona import add_carona_to_db, get_carona_by_id, remove_carona_from_db, update_carona_in_db
 from app.core.motorista import get_current_active_motorista
 from app.core.veiculo import get_motorista_veiculo_of_user
 from app.models.router_tags import RouterTags
@@ -84,9 +84,10 @@ def update_carona(
     preco_carona: float | None = None
 ) -> CaronaExtended:
     '''
-    Atualiza informações de uma carona criada pelo usuário, passando seu id em _carona_id_. Podem ser alterados o carro da carona (_veículo_id_), 
-    o preço (_preco_carona_) e/ou a hora de partida (_hora_de_partida_). Valores nulos em qualquer parâmetro opcional indica que não haverá
-    alteração de tal informação da carona no banco.
+    - Atualiza informações de uma carona criada pelo usuário, passando seu id em _carona_id_. 
+    - Podem ser alterados o carro da carona (_veículo_id_), o preço (_preco_carona_) e/ou a hora de partida (_hora_de_partida_). 
+    Valores nulos em qualquer parâmetro opcional indica que não haverá alteração de tal informação da carona no banco.
+    - Retorna a carona modificada
     '''
     
     if carona.fk_motorista != motorista.id_fk_user:
@@ -112,3 +113,22 @@ def update_carona(
     )
     
     return carona
+
+
+@router.delete("/{carona_id}", response_model=str)
+def delete_carona(
+    carona: Annotated[Carona, Depends(get_carona_by_id)],
+    carona_id: int,
+    motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
+    db: Annotated[Session, Depends(get_db)],
+)-> str:
+    '''
+    - Remove a carona criada pelo usuário passando seu id em _carona_id_
+    - Retorna uma mensagem "Carona id={_carona_id_} removida com sucesso" caso a carona seja removida
+    '''
+    if carona.fk_motorista != motorista.id_fk_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Carona id={carona_id} não encontrada.")
+
+    remove_carona_from_db(db_carona=carona, db=db)
+    
+    return f"Carona id={carona_id} removida com sucesso"
