@@ -13,7 +13,7 @@ from app.models.router_tags import RouterTags
 from app.models.veiculo_oop import MotoristaVeiculoBase, MotoristaVeiculoExtended, MotoristaVeiculoModel, VeiculoBase, VeiculoModel
 
 from app.utils.db_utils import get_db
-from app.core.veiculo import add_motorista_veiculo_to_db, add_veiculo_to_db, get_motorista_veiculo_of_user_by_placa, get_veiculo_by_info, get_motorista_veiculo_of_user
+from app.core.veiculo import add_motorista_veiculo_to_db, add_veiculo_to_db, get_all_motorista_veiculo_of_user, get_motorista_veiculo_of_user_by_placa, get_veiculo_by_info, get_motorista_veiculo_of_user
 from app.core.authentication import get_current_active_user
 
 
@@ -130,3 +130,19 @@ def read_my_veiculo_by_placa(
             detail=f"Nenhum veículo com placa {placa} encontrado para o usuário."
         )
     return db_motorista_veiculo
+
+
+@router.get("/me/all", response_model=list[MotoristaVeiculoExtended])
+def read_all_my_veiculos(
+    current_motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
+    db: Annotated[Session, Depends(get_db)],
+) -> list[MotoristaVeiculoExtended]:
+    '''
+    - Procura por todos os veículos do usuário atual
+    - Retorna informações dos veículos
+    '''
+    all_motorista_veiculo = get_all_motorista_veiculo_of_user(
+        motorista=current_motorista,
+        db=db
+    ) 
+    return all_motorista_veiculo
