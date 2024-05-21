@@ -84,7 +84,7 @@ def get_motorista_veiculo_of_user(
     motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
     db: Annotated[Session, Depends(get_db)]
 ) -> MotoristaVeiculo:
-    motorista_veiculo: MotoristaVeiculo = (
+    db_motorista_veiculo: MotoristaVeiculo = (
         db.query(MotoristaVeiculo)
         .filter(
             MotoristaVeiculo.fk_motorista == motorista.id_fk_user,
@@ -93,18 +93,34 @@ def get_motorista_veiculo_of_user(
         .first()
     )
     
-    return motorista_veiculo
+    return db_motorista_veiculo
 
 
 def get_all_motorista_veiculo_of_user(
-    current_motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
+    motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
     db: Annotated[Session, Depends(get_db)]
 )-> list[MotoristaVeiculo]:
-    motorista_veiculo: list[MotoristaVeiculo] = (
+    db_motorista_veiculo: list[MotoristaVeiculo] = (
         db.query(MotoristaVeiculo)
         .filter(
-            MotoristaVeiculo.fk_motorista == current_motorista.id_fk_user,
+            MotoristaVeiculo.fk_motorista == motorista.id_fk_user,
         )
         .all()
     )
-    return motorista_veiculo
+    return db_motorista_veiculo
+
+
+def get_motorista_veiculo_of_user_by_placa(
+    placa: str,
+    motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
+    db: Annotated[Session, Depends(get_db)]
+) -> MotoristaVeiculo:
+    db_motorista_veiculo: MotoristaVeiculo = (
+        db.query(MotoristaVeiculo)
+        .filter(
+            MotoristaVeiculo.fk_motorista == motorista.id_fk_user,
+            MotoristaVeiculo.placa == placa
+        )
+        .first()
+    )
+    return db_motorista_veiculo

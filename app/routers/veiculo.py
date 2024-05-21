@@ -10,10 +10,10 @@ from app.utils.veiculo_utils import TipoVeiculo, MarcaVeiculo, Cor
 from app.database.user_orm import Motorista, User
 
 from app.models.router_tags import RouterTags
-from app.models.veiculo_oop import MotoristaVeiculoBase, VeiculoBase, VeiculoModel
+from app.models.veiculo_oop import MotoristaVeiculoBase, MotoristaVeiculoExtended, MotoristaVeiculoModel, VeiculoBase, VeiculoModel
 
 from app.utils.db_utils import get_db
-from app.core.veiculo import add_motorista_veiculo_to_db, add_veiculo_to_db, get_veiculo_by_info, get_motorista_veiculo_of_user
+from app.core.veiculo import add_motorista_veiculo_to_db, add_veiculo_to_db, get_motorista_veiculo_of_user_by_placa, get_veiculo_by_info, get_motorista_veiculo_of_user
 from app.core.authentication import get_current_active_user
 
 
@@ -62,7 +62,7 @@ def create_veiculo(
     return db_veiculo
 
 
-@router.post("/motorista", response_model=UserModel)
+@router.post("/me", response_model=UserModel)
 def add_veiculo_to_me(
     tipo: TipoVeiculo,
     marca: MarcaVeiculo,
@@ -107,3 +107,26 @@ def add_veiculo_to_me(
     )
     
     return curent_user
+
+
+@router.get("/me", response_model=MotoristaVeiculoExtended)
+def read_my_veiculo_by_placa(
+    placa: str,
+    current_motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
+    db: Annotated[Session, Depends(get_db)],
+) -> MotoristaVeiculoExtended:
+    '''
+    - Procura pelo veículo de placa {_placa_} do usuário atual
+    - Retorna informações do veículo
+    '''
+    db_motorista_veiculo = get_motorista_veiculo_of_user_by_placa(
+        placa=placa,
+        motorista=current_motorista,
+        db=db
+    )
+    if not db_motorista_veiculo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Nenhum veículo com placa {placa} encontrado para o usuário."
+        )
+    return db_motorista_veiculo

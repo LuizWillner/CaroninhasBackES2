@@ -27,3 +27,8 @@ class MotoristaVeiculoModel(BaseModel):
     veiculo: VeiculoModel
     class Config:
         orm_mode = True
+        
+class MotoristaVeiculoExtended(MotoristaVeiculoModel):
+    id: int
+    fk_motorista: int
+    fk_veiculo: int
