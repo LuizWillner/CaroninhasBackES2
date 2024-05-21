@@ -112,7 +112,8 @@ def add_veiculo_to_me(
 
 @router.get("/me", response_model=MotoristaVeiculoExtended)
 def read_my_veiculo_by_placa(
-    db_motorista_veiculo: Annotated[MotoristaVeiculo, Depends(get_motorista_veiculo_of_user_by_placa)]
+    db_motorista_veiculo: Annotated[MotoristaVeiculo, Depends(get_motorista_veiculo_of_user_by_placa)],
+    placa: str
 ) -> MotoristaVeiculoExtended:
     '''
     - Procura pelo veículo de placa {_placa_} do usuário atual
