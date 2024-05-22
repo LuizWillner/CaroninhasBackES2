@@ -11,7 +11,7 @@ class MotoristaVeiculo(Base):
     id  = Column(Integer, primary_key=True, index=True, autoincrement=True)
     fk_motorista = Column(Integer, ForeignKey("motorista.id_fk_user"), index=True, nullable=False)
     fk_veiculo = Column(Integer, ForeignKey("veiculo.id"), index=True, nullable=False)
-    placa = Column(String, index=True, nullable=False, unique=True)
+    placa = Column(String, index=True, nullable=False, unique=False)  # Não é único pois um veículo do motorista desativado poderia repetir
     created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())
     active = Column(Boolean, index=False, nullable=False, server_default=sql.true())
