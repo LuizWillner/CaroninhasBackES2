@@ -12,6 +12,17 @@ from app.routers import user_carona
 load_dotenv(dotenv_path="credentials.env")
 
 app = FastAPI()
+
+# Configure CORS para permitir qualquer origem
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permitir qualquer origem
+    allow_credentials=True,
+    allow_methods=["*"],  # Permitir todos os métodos HTTP (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Permitir todos os cabeçalhos
+)
+
+
 app.include_router(hello_world.router)
 app.include_router(authentication.router)
 app.include_router(carona.router)
