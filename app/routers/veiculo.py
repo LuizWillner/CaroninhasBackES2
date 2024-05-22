@@ -21,6 +21,36 @@ from app.core.authentication import get_current_active_user
 router = APIRouter(prefix="/veiculo", tags=[RouterTags.motorista_e_veiculos])
 
 
+@router.get("/tipos", response_model=list[str])
+def get_all_veiculo_tipos(
+    current_user: Annotated[User, Depends(get_current_active_user)], 
+)->list[str]:
+    '''
+    - Retorna lista com todos os tipos de veículos esperados e tratados na API.
+    '''
+    return TipoVeiculo.get_tipos()
+
+
+@router.get("/marcas", response_model=list[str])
+def get_all_veiculo_marcas(
+   current_user: Annotated[User, Depends(get_current_active_user)],  
+) -> list[str]:
+    '''
+    - Retorna lista com todas as marcas de veículos esperadas e tratadas na API.
+    '''
+    return MarcaVeiculo.get_marcas()
+
+
+@router.get("/cores", response_model=list[str])
+def get_all_veiculo_cores(
+    current_user: Annotated[User, Depends(get_current_active_user)], 
+) -> list[str]:
+    '''
+    - Retorna lista com todas as cores de veículos esperadas e tratadas na API.
+    '''
+    return Cor.get_cores()
+
+
 @router.post("", response_model=VeiculoModel)
 def create_veiculo(
     tipo: TipoVeiculo,
@@ -32,10 +62,10 @@ def create_veiculo(
 ) -> VeiculoModel:
     
     veiculo_to_create = VeiculoBase(
-        tipo=tipo.value,
-        marca=marca.value,
-        modelo=modelo,
-        cor=cor.value
+        tipo=tipo.value.upper(),
+        marca=marca.value.upper(),
+        modelo=modelo.upper(),
+        cor=cor.value.upper()
     )
     
     db_veiculo = get_veiculo_by_info(
@@ -75,10 +105,10 @@ def add_veiculo_to_me(
     db: Annotated[Session, Depends(get_db)]
 ) -> MotoristaVeiculoExtended:
     veiculo = VeiculoBase(
-        tipo=tipo.value,
-        marca=marca.value,
-        modelo=modelo,
-        cor=cor.value
+        tipo=tipo.value.upper(),
+        marca=marca.value.upper(),
+        modelo=modelo.upper(),
+        cor=cor.value.upper()
     )
     
     db_veiculo = get_veiculo_by_info(
@@ -119,6 +149,8 @@ def read_my_veiculo_by_placa(
     - Procura pelo veículo de placa {_placa_} do usuário atual
     - Retorna informações do veículo
     '''
+    placa = placa.upper()
+    
     if not db_motorista_veiculo:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -151,6 +183,9 @@ def update_my_veiculo(
     Valores nulos em qualquer um dos campos indicam que a respectiva informação não será atualizada no banco.
     - Retorna a veículo do motorista atualizado
     '''
+    placa = placa.upper()
+    motorista_veiculo_update.new_cor = motorista_veiculo_update.new_cor.upper()
+    motorista_veiculo_update.new_placa = motorista_veiculo_update.new_placa.upper()
     
     if not db_motorista_veiculo:
         raise HTTPException(
@@ -202,6 +237,8 @@ def deactivate_my_veiculo(
     o veículo fosse desassociado do motorista, o histórico de caronas com esse veículo também seria perdido. Por
     isso ele é desativado. Do ponto de vista do usuário, para todos os efeitos, dá no mesmo que uma exclusão.
     '''
+    placa = placa.upper()
+    
     if not db_motorista_veiculo:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
