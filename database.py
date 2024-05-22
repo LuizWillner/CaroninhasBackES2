@@ -14,3 +14,5 @@ Base = declarative_base()
 from app.database.user_orm import *
 from app.database.veiculo_orm import *
 from app.database.carona_orm import *
+from app.database.user_carona_orm import *
+from app.database.pedido_carona_orm import *

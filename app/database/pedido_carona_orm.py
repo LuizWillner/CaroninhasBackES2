@@ -12,10 +12,11 @@ class PedidoCarona(Base):
     fk_user = Column(Integer, ForeignKey("user.id"), index=True, nullable=False)
     hora_partida_minima = Column(DateTime, index=True, nullable=False)
     hora_partida_maxima = Column(DateTime, index=True, nullable=False)
-    coord_partida = Column(String, index=True, nullable=False)
-    coord_destino = Column(String, index=True, nullable=False)
-    created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
+    # coord_partida = Column(String, index=True, nullable=False)
+    # coord_destino = Column(String, index=True, nullable=False)
+    created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())
-    user = relationship("User", back_populates="pedido_em_caronas")
+    
+    user = relationship("User", lazy=True, uselist=False, back_populates="pedidos_de_caronas")
 
     
