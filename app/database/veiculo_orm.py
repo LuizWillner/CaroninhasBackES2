@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, UniqueConstraint, Boolean, sql
 from database import Base
 
 
@@ -12,7 +12,9 @@ class MotoristaVeiculo(Base):
     fk_motorista = Column(Integer, ForeignKey("motorista.id_fk_user"), index=True, nullable=False)
     fk_veiculo = Column(Integer, ForeignKey("veiculo.id"), index=True, nullable=False)
     placa = Column(String, index=True, nullable=False, unique=True)
-    created_at = Column(DateTime, index=False, nullable=False, default=datetime.now)
+    created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())
+    active = Column(Boolean, index=False, nullable=False, server_default=sql.true(), onupdate=func.current_timestamp())
     
     motorista = relationship("Motorista", lazy=True, uselist=False, back_populates="motorista_veiculo")
     veiculo = relationship("Veiculo", lazy=True, uselist=False, back_populates="motorista_veiculo")
