@@ -51,46 +51,46 @@ def get_all_veiculo_cores(
     return Cor.get_cores()
 
 
-@router.post("", response_model=VeiculoModel)
-def create_veiculo(
-    tipo: TipoVeiculo,
-    marca: MarcaVeiculo,
-    modelo: str,
-    cor: Cor,
-    current_user: Annotated[User, Depends(get_current_active_user)],
-    db: Annotated[Session, Depends(get_db)]
-) -> VeiculoModel:
+# @router.post("", response_model=VeiculoModel)
+# def create_veiculo(
+#     tipo: TipoVeiculo,
+#     marca: MarcaVeiculo,
+#     modelo: str,
+#     cor: Cor,
+#     current_user: Annotated[User, Depends(get_current_active_user)],
+#     db: Annotated[Session, Depends(get_db)]
+# ) -> VeiculoModel:
     
-    veiculo_to_create = VeiculoBase(
-        tipo=tipo.value.upper(),
-        marca=marca.value.upper(),
-        modelo=modelo.upper(),
-        cor=cor.value.upper()
-    )
+#     veiculo_to_create = VeiculoBase(
+#         tipo=tipo.value.upper(),
+#         marca=marca.value.upper(),
+#         modelo=modelo.upper(),
+#         cor=cor.value.upper()
+#     )
     
-    db_veiculo = get_veiculo_by_info(
-        tipo=veiculo_to_create.tipo,
-        marca=veiculo_to_create.marca,
-        modelo=veiculo_to_create.modelo,
-        cor=veiculo_to_create.cor,
-        db=db
-    )
-    if db_veiculo:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Veículo já existe."
-        )
+#     db_veiculo = get_veiculo_by_info(
+#         tipo=veiculo_to_create.tipo,
+#         marca=veiculo_to_create.marca,
+#         modelo=veiculo_to_create.modelo,
+#         cor=veiculo_to_create.cor,
+#         db=db
+#     )
+#     if db_veiculo:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Veículo já existe."
+#         )
         
-    db_veiculo = add_veiculo_to_db(
-        veiculo_to_create=VeiculoBase(
-            tipo=tipo.value,
-            marca=marca.value,
-            modelo=modelo,
-            cor=cor.value
-        ),
-        db=db
-    )
-    return db_veiculo
+#     db_veiculo = add_veiculo_to_db(
+#         veiculo_to_create=VeiculoBase(
+#             tipo=tipo.value,
+#             marca=marca.value,
+#             modelo=modelo,
+#             cor=cor.value
+#         ),
+#         db=db
+#     )
+#     return db_veiculo
 
 
 @router.post("/me", response_model=MotoristaVeiculoExtended)
