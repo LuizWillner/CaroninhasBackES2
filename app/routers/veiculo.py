@@ -190,6 +190,28 @@ def update_my_veiculo(
     return db_motorista_veiculo
 
 
-# @router.delete("/me", response_model=str)
-# def delete_my_veiculo_and_caronas() -> str:
-#     return
+@router.patch("/me/deactivate", response_model=str)
+def deactivate_my_veiculo(
+    db_motorista_veiculo: Annotated[MotoristaVeiculo, Depends(get_motorista_veiculo_of_user_by_placa)],
+    placa: str,
+    db: Annotated[Session, Depends(get_db)]
+) -> str:
+    '''
+    - Desativa o veículo de um motorista, dada uma placa no param _placa_.
+    - **IMPORTANTE:** Esse endpoint NÃO exclui o veículo do motorista do banco, e sim o DESATIVA. Isso porque se
+    o veículo fosse desassociado do motorista, o histórico de caronas com esse veículo também seria perdido. Por
+    isso ele é desativado. Do ponto de vista do usuário, para todos os efeitos, dá no mesmo que uma exclusão.
+    '''
+    if not db_motorista_veiculo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Nenhum veículo com placa {placa} encontrado para o usuário."
+        )
+    
+    update_motorista_veiculo_in_db(
+        db_motorista_veiculo=db_motorista_veiculo,
+        db=db,
+        new_active=False
+    )
+        
+    return f"Veículo de placa {placa} do usuário desativado."

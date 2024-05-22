@@ -132,12 +132,15 @@ def update_motorista_veiculo_in_db(
     db_motorista_veiculo: Annotated[MotoristaVeiculo, Depends(get_motorista_veiculo_of_user_by_placa)],
     db: Annotated[Session, Depends(get_db)],
     new_placa: str | None = None,
-    new_fk_veiculo: int | None = None
+    new_fk_veiculo: int | None = None,
+    new_active: bool | None = None
 ) -> MotoristaVeiculo:
     if new_fk_veiculo is not None:
         db_motorista_veiculo.fk_veiculo = new_fk_veiculo
     if new_placa is not None:
         db_motorista_veiculo.placa = new_placa
+    if new_active is not None:
+        db_motorista_veiculo.active = new_active
     
     try:
         db.add(db_motorista_veiculo)
