@@ -5,7 +5,7 @@ Projeto da disciplina Engenharia de Software 2 | Back-end | Universidade Federal
 ## Configurando ambiente de desenvolvimento
 
 1. Baixar e instalar **Python 3.10**
-	- No **Windows**, baixar e instalar pelo executável no [site](https://www.python.org/downloads/release/python-3122/).
+	- No **Windows**, baixar e instalar pelo executável no [site](https://www.python.org/downloads/).
 		
 	- No **Ubuntu**, instalar pelo comando do terminal:
 		```shell
