@@ -46,7 +46,7 @@ class UserModel(UserBase):
     id: int
     active: bool = True
     created_at: datetime
-    motorista: MotoristaWithVeiculos | None = None
+    motorista: MotoristaModel | None = None
     class Config:
         orm_mode = True
         
