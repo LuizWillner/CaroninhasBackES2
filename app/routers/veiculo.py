@@ -4,16 +4,17 @@ from pydantic import BaseModel
 from typing import List, Annotated, Optional
 
 from app.core.motorista import get_current_active_motorista
+from app.database.veiculo_orm import MotoristaVeiculo
 from app.models.user_oop import UserModel
 from app.utils.veiculo_utils import TipoVeiculo, MarcaVeiculo, Cor
 
 from app.database.user_orm import Motorista, User
 
 from app.models.router_tags import RouterTags
-from app.models.veiculo_oop import MotoristaVeiculoBase, VeiculoBase, VeiculoModel
+from app.models.veiculo_oop import MotoristaVeiculoBase, MotoristaVeiculoExtended, MotoristaVeiculoModel, VeiculoBase, VeiculoModel
 
 from app.utils.db_utils import get_db
-from app.core.veiculo import add_motorista_veiculo_to_db, add_veiculo_to_db, get_veiculo_by_info, get_motorista_veiculo_of_user
+from app.core.veiculo import add_motorista_veiculo_to_db, add_veiculo_to_db, get_all_motorista_veiculo_of_user, get_motorista_veiculo_of_user_by_placa, get_veiculo_by_info, get_motorista_veiculo_of_user
 from app.core.authentication import get_current_active_user
 
 
@@ -62,7 +63,7 @@ def create_veiculo(
     return db_veiculo
 
 
-@router.post("/motorista", response_model=UserModel)
+@router.post("/me", response_model=UserModel)
 def add_veiculo_to_me(
     tipo: TipoVeiculo,
     marca: MarcaVeiculo,
@@ -107,3 +108,31 @@ def add_veiculo_to_me(
     )
     
     return curent_user
+
+
+@router.get("/me", response_model=MotoristaVeiculoExtended)
+def read_my_veiculo_by_placa(
+    db_motorista_veiculo: Annotated[MotoristaVeiculo, Depends(get_motorista_veiculo_of_user_by_placa)],
+    placa: str
+) -> MotoristaVeiculoExtended:
+    '''
+    - Procura pelo veículo de placa {_placa_} do usuário atual
+    - Retorna informações do veículo
+    '''
+    if not db_motorista_veiculo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Nenhum veículo com placa {placa} encontrado para o usuário."
+        )
+    return db_motorista_veiculo
+
+
+@router.get("/me/all", response_model=list[MotoristaVeiculoExtended])
+def read_all_my_veiculos(
+    all_motorista_veiculo: Annotated[list[MotoristaVeiculo], Depends(get_all_motorista_veiculo_of_user)],
+) -> list[MotoristaVeiculoExtended]:
+    '''
+    - Procura por todos os veículos do usuário atual
+    - Retorna informações dos veículos
+    '''
+    return all_motorista_veiculo

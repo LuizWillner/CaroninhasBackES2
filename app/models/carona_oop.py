@@ -14,6 +14,11 @@ class CaronaModel(CaronaBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    
+class CaronaUpdate(BaseModel):
+    fk_motorista_veiculo: int | None = None
+    hora_partida: datetime | None = None
+    valor: float | None = None
 
 # ===========================================================================
 
