@@ -87,7 +87,7 @@ Projeto da disciplina Engenharia de Software 2 | Back-end | Universidade Federal
 
 12. Adicionar variável de ambiente *DB_URI* em credentials.env contendo o link do database criado
 	```
-	DB_URI=postgres+psycopg2://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName
+	DB_URI=postgresql+psycopg2://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName
 	```
 
 8. Adicionar variável de ambiente *HASH_SECRET_KEY* em credentials.env contendo a chave usada para fazer o hash. Exemplo:
