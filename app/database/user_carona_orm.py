@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, func, UniqueConstraint
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, func, UniqueConstraint, Float, String
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -9,8 +9,12 @@ class UserCarona(Base):
     id = Column(Integer, primary_key=True, index=True)
     fk_user = Column(Integer, ForeignKey('user.id'), index=True, nullable=False)
     fk_carona = Column(Integer, ForeignKey('carona.id'), index=True, nullable=False)
+    nota_motorista = Column(Float, index=True,nullable=False)
+    nota_pasageiro = Column(Float,index= True, nullable=False)
+    comentário_sobre_motorista = Column(String,index=True, nullable=False)
+    comentário_sobre_passageiro = Column(String, index=True, nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())  
     
     __table_args__ = (
         UniqueConstraint("fk_user", "fk_carona"),
