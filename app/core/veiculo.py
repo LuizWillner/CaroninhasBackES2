@@ -10,7 +10,7 @@ from app.utils.db_utils import get_db
 from app.database.user_orm import User, Motorista
 from app.database.veiculo_orm import MotoristaVeiculo, Veiculo
 
-from app.models.veiculo_oop import MotoristaVeiculoBase, MotoristaVeiculoModel, VeiculoBase, VeiculoModel
+from app.models.veiculo_oop import MotoristaVeiculoBase, MotoristaVeiculoModel, MotoristaVeiculoUpdate, VeiculoBase, VeiculoModel
 
 from app.core.motorista import get_current_active_motorista
 from app.core.authentication import (
@@ -88,7 +88,8 @@ def get_motorista_veiculo_of_user(
         db.query(MotoristaVeiculo)
         .filter(
             MotoristaVeiculo.fk_motorista == motorista.id_fk_user,
-            MotoristaVeiculo.fk_veiculo == veiculo_id
+            MotoristaVeiculo.fk_veiculo == veiculo_id,
+            MotoristaVeiculo.active == True
         )
         .first()
     )
@@ -104,7 +105,8 @@ def get_motorista_veiculo_of_user_by_placa(
         db.query(MotoristaVeiculo)
         .filter(
             MotoristaVeiculo.fk_motorista == motorista.id_fk_user,
-            MotoristaVeiculo.placa == placa
+            MotoristaVeiculo.placa == placa,
+            MotoristaVeiculo.active == True
         )
         .first()
     )
@@ -119,7 +121,30 @@ def get_all_motorista_veiculo_of_user(
         db.query(MotoristaVeiculo)
         .filter(
             MotoristaVeiculo.fk_motorista == motorista.id_fk_user,
+            MotoristaVeiculo.active == True
         )
         .all()
     )
+    return db_motorista_veiculo
+
+
+def update_motorista_veiculo_in_db(
+    db_motorista_veiculo: Annotated[MotoristaVeiculo, Depends(get_motorista_veiculo_of_user_by_placa)],
+    db: Annotated[Session, Depends(get_db)],
+    new_placa: str | None = None,
+    new_fk_veiculo: int | None = None
+) -> MotoristaVeiculo:
+    if new_fk_veiculo is not None:
+        db_motorista_veiculo.fk_veiculo = new_fk_veiculo
+    if new_placa is not None:
+        db_motorista_veiculo.placa = new_placa
+    
+    try:
+        db.add(db_motorista_veiculo)
+        db.commit()
+    except SQLAlchemyError as sqlae:
+        msg = f"Não foi possível atualizar o veículo do motorista no banco: {sqlae}"
+        logging.error(msg)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
+    
     return db_motorista_veiculo

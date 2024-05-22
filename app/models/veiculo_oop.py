@@ -32,3 +32,7 @@ class MotoristaVeiculoExtended(MotoristaVeiculoModel):
     id: int
     fk_motorista: int
     fk_veiculo: int
+    
+class MotoristaVeiculoUpdate(BaseModel):
+    new_cor: str | None = None
+    new_placa: str | None = None
