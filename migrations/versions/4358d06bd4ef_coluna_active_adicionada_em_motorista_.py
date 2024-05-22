@@ -1,8 +1,8 @@
 """coluna active adicionada em motorista_veiculo
 
-Revision ID: 447302a88d7b
+Revision ID: 4358d06bd4ef
 Revises: 8e326fbc9f8f
-Create Date: 2024-05-21 23:57:03.951482
+Create Date: 2024-05-22 00:37:41.223459
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '447302a88d7b'
+revision: str = '4358d06bd4ef'
 down_revision: Union[str, None] = '8e326fbc9f8f'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
