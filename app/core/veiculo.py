@@ -24,10 +24,10 @@ def add_veiculo_to_db(
 )-> Veiculo:
     
     db_veiculo = Veiculo(
-        tipo=veiculo_to_create.tipo,
-        marca=veiculo_to_create.marca,
-        modelo=veiculo_to_create.modelo,
-        cor=veiculo_to_create.cor,
+        tipo=veiculo_to_create.tipo.upper(),
+        marca=veiculo_to_create.marca.upper(),
+        modelo=veiculo_to_create.modelo.upper(),
+        cor=veiculo_to_create.cor.upper(),
     )
     try:
         db.add(db_veiculo)
@@ -66,7 +66,7 @@ def add_motorista_veiculo_to_db(
     db_motorista_veiculo = MotoristaVeiculo(
         fk_motorista = motorista_veiculo_to_create.fk_motorista,
         fk_veiculo = motorista_veiculo_to_create.fk_veiculo,
-        placa = motorista_veiculo_to_create.placa
+        placa = motorista_veiculo_to_create.placa.upper()
     )
     try:
         db.add(db_motorista_veiculo)
@@ -138,7 +138,7 @@ def update_motorista_veiculo_in_db(
     if new_fk_veiculo is not None:
         db_motorista_veiculo.fk_veiculo = new_fk_veiculo
     if new_placa is not None:
-        db_motorista_veiculo.placa = new_placa
+        db_motorista_veiculo.placa = new_placa.upper()
     if new_active is not None:
         db_motorista_veiculo.active = new_active
     
