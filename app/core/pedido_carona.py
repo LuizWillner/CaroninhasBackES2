@@ -42,13 +42,6 @@ def add_pedido_carona_to_db(
 
 
 def get_pedido_carona_by_id(db: Session, pedido_carona_id: int) -> PedidoCarona:
-    pedido_carona = db.query(PedidoCarona).filter(PedidoCarona.id == pedido_carona_id).first()
-    if not pedido_carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PedidoCarona not found")
-    return pedido_carona
-
-
-def get_pedido_carona_by_id(db: Session, pedido_carona_id: int) -> PedidoCarona:
     return db.query(PedidoCarona).filter(PedidoCarona.id == pedido_carona_id).first()
 
 
