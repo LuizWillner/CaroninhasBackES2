@@ -6,21 +6,24 @@ class PedidoCaronaBase(BaseModel):
     fk_user: int
     hora_partida_minima: datetime
     hora_partida_maxima: datetime
-    coord_partida: str
-    coord_destino: str
+    valor: float
+    # coord_partida: str
+    # coord_destino: str
 
 class PedidoCaronaCreate(PedidoCaronaBase):
-    created_at: datetime
-
-class PedidoCaronaUpdate(PedidoCaronaBase):
-    pass
-
-class PedidoCaronaExtended(PedidoCaronaBase):
     id: int
     created_at: datetime
-    user: UserModel
-
+    updated_at: datetime
+    
     class Config:
         orm_mode = True
     
+
+class PedidoCaronaUpdate(BaseModel):
+    hora_partida_minima: datetime | None = None
+    hora_partida_maxima: datetime | None = None
+    valor: float | None = None
+
+class PedidoCaronaExtended(PedidoCaronaCreate):
+    user: UserModel
     

@@ -15,7 +15,7 @@ class PedidoCarona(Base):
     valor = Column(Float, index=True, nullable=False)
     # coord_partida = Column(String, index=True, nullable=False)
     # coord_destino = Column(String, index=True, nullable=False)
-    aceito = Column(Boolean, index=True, nullable=False, server_default=sql.true())
+    aceito = Column(Boolean, index=True, nullable=False, server_default=sql.false())
     created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())
     

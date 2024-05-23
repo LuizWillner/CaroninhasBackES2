@@ -40,13 +40,15 @@ class MotoristaWithVeiculos(MotoristaModel):
 class MotoristaWithUser(MotoristaModel):
     user: UserBase
 
-# ===========================================================================     
+# ===========================================================================   
 
-class UserModel(UserBase):
+class UserWithoutMotorista(UserBase):
     id: int
     active: bool = True
     created_at: datetime
-    motorista: MotoristaModel | None = None
     class Config:
         orm_mode = True
+
+class UserModel(UserWithoutMotorista):
+    motorista: MotoristaModel | None = None
         

@@ -17,16 +17,18 @@ from app.core.authentication import (
     get_current_active_user
 )
 
+
 def add_pedido_carona_to_db(
     pedido_carona_to_add: PedidoCaronaBase,
     db: Annotated[Session, Depends(get_db)]
 ) -> PedidoCarona:
     db_pedido_carona = PedidoCarona(
+        fk_user = pedido_carona_to_add.fk_user,
         hora_partida_minima = pedido_carona_to_add.hora_partida_minima,
         hora_partida_maxima = pedido_carona_to_add.hora_partida_maxima,
-        coord_partida = pedido_carona_to_add.coord_partida,
-        coord_destino = pedido_carona_to_add.coord_destino,
-        fk_user = pedido_carona_to_add.fk_user
+        valor=pedido_carona_to_add.valor,
+        # coord_partida = pedido_carona_to_add.coord_partida,
+        # coord_destino = pedido_carona_to_add.coord_destino,
     )
     try:
         db.add(db_pedido_carona)
@@ -38,48 +40,44 @@ def add_pedido_carona_to_db(
     
     return db_pedido_carona
 
-def get_pedido_carona_by_id(db: Session, pedido_carona_id: int) -> PedidoCarona:
-    pedido_carona = db.query(PedidoCarona).filter(PedidoCarona.id == pedido_carona_id).first()
-    if not pedido_carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PedidoCarona not found")
-    return pedido_carona
 
 def get_pedido_carona_by_id(db: Session, pedido_carona_id: int) -> PedidoCarona:
     return db.query(PedidoCarona).filter(PedidoCarona.id == pedido_carona_id).first()
 
+
 def get_pedido_caronas(db: Session, skip: int = 0, limit: int = 10) -> list[PedidoCarona]:
     return db.query(PedidoCarona).offset(skip).limit(limit).all()
+
 
 def update_pedido_carona_in_db(db: Session, pedido_carona_id: int, pedido_carona: PedidoCaronaUpdate) -> PedidoCarona:
     db_pedido_carona = get_pedido_carona_by_id(db, pedido_carona_id)
     if not db_pedido_carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PedidoCarona not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido de Carona não encontrado.")
     
     for key, value in pedido_carona.dict().items():
-        setattr(db_pedido_carona, key, value)
+        if value is not None:
+            setattr(db_pedido_carona, key, value)
     
     try:
         db.commit()
         db.refresh(db_pedido_carona)
     except SQLAlchemyError as sqlae:
-        msg = f"Could not update PedidoCarona in the database: {sqlae}"
+        msg = f"Não foi possível atualizar o Pedido de Carona no banco: {sqlae}"
         logging.error(msg)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
     return db_pedido_carona
 
-class SuccessResponse(BaseModel):
-    message: str
 
-def delete_pedido_carona_from_db(db: Session, pedido_carona_id: int) -> SuccessResponse:
+def delete_pedido_carona_from_db(db: Session, pedido_carona_id: int) -> str:
     db_pedido_carona = get_pedido_carona_by_id(db, pedido_carona_id)
     if not db_pedido_carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PedidoCarona not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido de Carona não encontrado.")
     
     try:
         db.delete(db_pedido_carona)
         db.commit()
     except SQLAlchemyError as sqlae:
-        msg = f"Could not delete PedidoCarona from the database: {sqlae}"
+        msg = f"Não foi possível deletar Pedido de Carona do banco: {sqlae}"
         logging.error(msg)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
-    return SuccessResponse(message="Pedido de Carona deletado com sucesso!")
+    return f"Pedido de Carona id={pedido_carona_id} deletado com sucesso!"
