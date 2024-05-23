@@ -51,7 +51,7 @@ def search_caronas(
     current_user: Annotated[User, Depends(get_current_active_user)],  # precisa estar logado para usar o endpoint
     motorista_id: int | None = Query(None, description="ID do motorista para filtrar as caronas de um motorista. Se nada for passado, as caronas não serão filtradas por motorista"),
     hora_minima: datetime = Query(datetime.now(), description="Hora mínima de partida da carona. Se nada for passado, será considerada a hora atual"),
-    hora_maxima: datetime = Query(datetime(2500, 1, 1, 0, 0, 0), description="Hora máxima de partida da carona"),
+    hora_maxima: datetime = Query(datetime.now()+timedelta(days=365), description="Hora máxima de partida da carona. Se nada for passado, será considerada a hora atual+1ano"),
     valor_minimo: float = Query(0, description="Valor mínimo de preço da carona"),
     valor_maximo: float = Query(999999, description="Valor máximo de preço da carona"),
     # local_partida: ?,

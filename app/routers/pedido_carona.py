@@ -84,7 +84,7 @@ def search_pedidos_carona(
     current_user: Annotated[User, Depends(get_current_active_user)],
     user_id: int | None = Query(None, description="ID do usuário para filtrar os pedidos feitos por um usuário. Se nada for passado, os pedidos não serão filtrados por usuário"),
     hora_minima: datetime = Query(datetime.now()-timedelta(hours=12), description="Hora mínima de partida para filtrar os pedidos. Se nada for passado, será considerada a hora atual-12h"),
-    hora_maxima: datetime = Query(datetime(2500, 1, 1, 0, 0, 0), description="Hora máxima de partida para filtrar os pedidos"),
+    hora_maxima: datetime = Query(datetime.now()-timedelta(days=365), description="Hora máxima de partida para filtrar os pedidos. Se nada for passado, será considerada a hora atual+1ano"),
     valor_minimo: float = Query(0, description="Valor mínimo de preço do pedido de carona"),
     valor_maximo: float = Query(999999, description="Valor máximo de preço pedido de carona"),
     # local_partida: ?? = Query(),
