@@ -17,6 +17,7 @@ from app.core.authentication import (
     get_current_active_user
 )
 
+
 def add_pedido_carona_to_db(
     pedido_carona_to_add: PedidoCaronaBase,
     db: Annotated[Session, Depends(get_db)]
@@ -39,17 +40,21 @@ def add_pedido_carona_to_db(
     
     return db_pedido_carona
 
+
 def get_pedido_carona_by_id(db: Session, pedido_carona_id: int) -> PedidoCarona:
     pedido_carona = db.query(PedidoCarona).filter(PedidoCarona.id == pedido_carona_id).first()
     if not pedido_carona:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PedidoCarona not found")
     return pedido_carona
 
+
 def get_pedido_carona_by_id(db: Session, pedido_carona_id: int) -> PedidoCarona:
     return db.query(PedidoCarona).filter(PedidoCarona.id == pedido_carona_id).first()
 
+
 def get_pedido_caronas(db: Session, skip: int = 0, limit: int = 10) -> list[PedidoCarona]:
     return db.query(PedidoCarona).offset(skip).limit(limit).all()
+
 
 def update_pedido_carona_in_db(db: Session, pedido_carona_id: int, pedido_carona: PedidoCaronaUpdate) -> PedidoCarona:
     db_pedido_carona = get_pedido_carona_by_id(db, pedido_carona_id)
@@ -68,8 +73,10 @@ def update_pedido_carona_in_db(db: Session, pedido_carona_id: int, pedido_carona
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
     return db_pedido_carona
 
+
 class SuccessResponse(BaseModel):
     message: str
+
 
 def delete_pedido_carona_from_db(db: Session, pedido_carona_id: int) -> SuccessResponse:
     db_pedido_carona = get_pedido_carona_by_id(db, pedido_carona_id)
