@@ -25,20 +25,20 @@ router = APIRouter(prefix="/pedido_carona", tags=[RouterTags.pedido_carona])
 @router.post("", response_model=PedidoCaronaExtended)
 def create_pedido_carona(
     current_user: Annotated[User, Depends(get_current_active_user)],
-    hora_partida_minima: datetime,
-    hora_partida_maxima: datetime,
-    coord_partida: str,
-    coord_destino: str,
-    db: Annotated[Session, Depends(get_db)]
+    db: Annotated[Session, Depends(get_db)],
+    hora_partida_minima: datetime = Query(datetime.now()),
+    hora_partida_maxima: datetime = Query(),
+    valor_sugerido: float = Query()
+    # coord_partida: str,
+    # coord_destino: str,
 ) -> PedidoCaronaExtended:
     pedido_carona = add_pedido_carona_to_db(
-        pedido_carona_to_add=PedidoCaronaCreate(
+        pedido_carona_to_add=PedidoCaronaBase(
             fk_user=current_user.id,
             hora_partida_maxima=hora_partida_maxima,
             hora_partida_minima=hora_partida_minima,
-            coord_partida=coord_partida,
-            coord_destino=coord_destino,
-            created_at=datetime.utcnow()
+            # coord_partida=coord_partida,
+            # coord_destino=coord_destino
         ),
         db=db
     )
