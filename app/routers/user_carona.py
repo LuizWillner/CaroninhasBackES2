@@ -44,11 +44,12 @@ def add_me_to_carona(
 @router.get("/{user_carona_id}", response_model=UserCaronaExtended)
 def read_user_carona(
     user_carona_id: int,
-    db: Annotated[Session, Depends(get_db)]
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)]
 ) -> UserCaronaExtended:
-    user_carona = get_user_carona_by_id(db, user_carona_id)
+    user_carona = get_user_carona_by_id(db=db, user_carona_id=user_carona_id)
     if not user_carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="UserCarona not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não foi encontrado inscrito na carona.")
     return user_carona
 
 

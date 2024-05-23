@@ -29,5 +29,5 @@ class CaronaSecondary(BaseModel):  # Modelo de Carona criado para evitar circula
     motorista: MotoristaWithUser
     veiculo_do_motorista: MotoristaVeiculoModel
 
-class UserCaronaExtended(UserCaronaBase):
+class UserCaronaExtended(UserCaronaWithUser):
     carona: CaronaSecondary
