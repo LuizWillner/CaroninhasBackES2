@@ -11,7 +11,7 @@ class CaronaBase(BaseModel):
     hora_partida: datetime
     valor: float
     local_partida: str
-    local_chegada: str
+    local_destino: str
     
 class CaronaModel(CaronaBase):
     id: int

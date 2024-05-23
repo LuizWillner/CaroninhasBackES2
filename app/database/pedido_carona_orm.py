@@ -14,7 +14,7 @@ class PedidoCarona(Base):
     hora_partida_maxima = Column(DateTime, index=True, nullable=False)
     valor = Column(Float, index=True, nullable=False)
     local_partida = Column(String, index=True, nullable=False)
-    local_chegada = Column(String, index=True, nullable=False)
+    local_destino = Column(String, index=True, nullable=False)
     aceito = Column(Boolean, index=True, nullable=False, server_default=sql.false())
     created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())
