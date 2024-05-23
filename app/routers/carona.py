@@ -87,7 +87,7 @@ def search_caronas(
     return caronas
 
 
-@router.patch("/{carona_id}", response_model=CaronaExtended)
+@router.put("/{carona_id}", response_model=CaronaExtended)
 def update_carona(
     carona: Annotated[Carona, Depends(get_carona_by_id)],
     carona_id: int,

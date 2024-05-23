@@ -87,7 +87,7 @@ def read_user(
     return user
 
 
-@router.patch("/users/me", response_model=BasicResponse)
+@router.put("/users/me", response_model=BasicResponse)
 def update_my_user(
     updated_user: Annotated[User, Depends(change_current_user_info)]
 )-> BasicResponse:

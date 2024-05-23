@@ -170,7 +170,7 @@ def read_all_my_veiculos(
     return all_motorista_veiculo
 
 
-@router.patch("/me", response_model=MotoristaVeiculoExtended)
+@router.put("/me", response_model=MotoristaVeiculoExtended)
 def update_my_veiculo(
     motorista_veiculo_update: MotoristaVeiculoUpdate,
     db_motorista_veiculo: Annotated[MotoristaVeiculo, Depends(get_motorista_veiculo_of_user_by_placa)],
@@ -225,7 +225,7 @@ def update_my_veiculo(
     return db_motorista_veiculo
 
 
-@router.patch("/me/deactivate", response_model=str)
+@router.put("/me/deactivate", response_model=str)
 def deactivate_my_veiculo(
     db_motorista_veiculo: Annotated[MotoristaVeiculo, Depends(get_motorista_veiculo_of_user_by_placa)],
     placa: str,
