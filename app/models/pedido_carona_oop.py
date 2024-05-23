@@ -19,8 +19,10 @@ class PedidoCaronaCreate(PedidoCaronaBase):
         orm_mode = True
     
 
-class PedidoCaronaUpdate(PedidoCaronaBase):
-    pass
+class PedidoCaronaUpdate(BaseModel):
+    hora_partida_minima: datetime | None = None
+    hora_partida_maxima: datetime | None = None
+    valor: float | None = None
 
 class PedidoCaronaExtended(PedidoCaronaCreate):
     user: UserModel

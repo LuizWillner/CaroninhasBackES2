@@ -52,16 +52,17 @@ def get_pedido_caronas(db: Session, skip: int = 0, limit: int = 10) -> list[Pedi
 def update_pedido_carona_in_db(db: Session, pedido_carona_id: int, pedido_carona: PedidoCaronaUpdate) -> PedidoCarona:
     db_pedido_carona = get_pedido_carona_by_id(db, pedido_carona_id)
     if not db_pedido_carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PedidoCarona not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido de Carona não encontrado.")
     
     for key, value in pedido_carona.dict().items():
-        setattr(db_pedido_carona, key, value)
+        if value is not None:
+            setattr(db_pedido_carona, key, value)
     
     try:
         db.commit()
         db.refresh(db_pedido_carona)
     except SQLAlchemyError as sqlae:
-        msg = f"Could not update PedidoCarona in the database: {sqlae}"
+        msg = f"Não foi possível atualizar o Pedido de Carona no banco: {sqlae}"
         logging.error(msg)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
     return db_pedido_carona

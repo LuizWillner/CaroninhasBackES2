@@ -62,7 +62,8 @@ def read_pedido_carona(
 def update_pedido_carona(
     pedido_carona_id: int,
     pedido_carona: PedidoCaronaUpdate,
-    db: Annotated[Session, Depends(get_db)]
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)]  # precisa estar logado para usar o endpoint
 ) -> PedidoCaronaExtended:
     return update_pedido_carona_in_db(db=db, pedido_carona_id=pedido_carona_id, pedido_carona=pedido_carona)
 
