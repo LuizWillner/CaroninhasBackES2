@@ -62,13 +62,13 @@ def read_user_caronas(
     return get_user_caronas(db, skip=skip, limit=limit)
 
 
-@router.put("/{user_carona_id}", response_model=UserCaronaExtended)
-def update_user_carona(
-    user_carona_id: int,
-    user_carona: UserCaronaUpdate,
-    db: Annotated[Session, Depends(get_db)]
-) -> UserCaronaExtended:
-    return update_user_carona_in_db(db=db, user_carona_id=user_carona_id, user_carona=user_carona)
+# @router.put("/{user_carona_id}", response_model=UserCaronaExtended)
+# def update_user_carona(
+#     user_carona_id: int,
+#     user_carona: UserCaronaUpdate,
+#     db: Annotated[Session, Depends(get_db)]
+# ) -> UserCaronaExtended:
+#     return update_user_carona_in_db(db=db, user_carona_id=user_carona_id, user_carona=user_carona)
 
 
 @router.delete("/{user_carona_id}", response_model=UserCaronaExtended)
