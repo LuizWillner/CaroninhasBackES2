@@ -58,15 +58,6 @@ def read_pedido_carona(
     return pedido_carona
 
 
-@router.get("/", response_model=List[PedidoCaronaExtended])
-def read_pedido_caronas(
-    db: Annotated[Session, Depends(get_db)],
-    skip: int = 0, 
-    limit: int = 10
-) -> List[PedidoCaronaExtended]:
-    return get_pedido_caronas(db, skip=skip, limit=limit)
-
-
 @router.put("/{pedido_carona_id}", response_model=PedidoCaronaExtended)
 def update_pedido_carona(
     pedido_carona_id: int,
