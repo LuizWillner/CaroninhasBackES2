@@ -55,15 +55,6 @@ def read_user_carona(
     return user_carona
 
 
-@router.get("/", response_model=List[UserCaronaExtended])
-def read_user_caronas(
-    db: Annotated[Session, Depends(get_db)],
-    skip: int = 0, 
-    limit: int = 10
-) -> List[UserCaronaExtended]:
-    return get_user_caronas(db, skip=skip, limit=limit)
-
-
 # @router.put("/{user_carona_id}", response_model=UserCaronaExtended)
 # def update_user_carona(
 #     user_carona_id: int,

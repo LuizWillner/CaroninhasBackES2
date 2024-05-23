@@ -25,10 +25,6 @@ def get_user_carona_by_user_and_carona(db: Session, user_id: int, carona_id: int
     return db.query(UserCarona).filter(UserCarona.fk_user == user_id, UserCarona.fk_carona == carona_id).first()
 
 
-def get_user_caronas(db: Session, skip: int = 0, limit: int = 10) -> list[UserCarona]:
-    return db.query(UserCarona).offset(skip).limit(limit).all()
-
-
 # def update_user_carona_in_db(db: Session, user_carona_id: int, user_carona: UserCaronaUpdate) -> UserCarona:
 #     db_user_carona = get_user_carona_by_id(db, user_carona_id)
 #     if not db_user_carona:
