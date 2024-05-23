@@ -15,7 +15,7 @@ def add_user_carona_to_db(user_carona_to_add: UserCaronaBase, db: Session) -> Us
         db.commit()
         db.refresh(db_user_carona)
     except SQLAlchemyError as sqlae:
-        msg = f"Could not add UserCarona to the database: {sqlae}"
+        msg = f"Não foi possível adicionar usuário a carona: {sqlae}"
         logging.error(msg)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
     return db_user_carona
@@ -32,7 +32,7 @@ def get_user_caronas(db: Session, skip: int = 0, limit: int = 10) -> list[UserCa
 def update_user_carona_in_db(db: Session, user_carona_id: int, user_carona: UserCaronaUpdate) -> UserCarona:
     db_user_carona = get_user_carona_by_id(db, user_carona_id)
     if not db_user_carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="UserCarona not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não foi encontrado inscrito na carona.")
     
     for key, value in user_carona.dict().items():
         setattr(db_user_carona, key, value)
@@ -41,22 +41,22 @@ def update_user_carona_in_db(db: Session, user_carona_id: int, user_carona: User
         db.commit()
         db.refresh(db_user_carona)
     except SQLAlchemyError as sqlae:
-        msg = f"Could not update UserCarona in the database: {sqlae}"
+        msg = f"Não foi possível atualizar UserCarona: {sqlae}"
         logging.error(msg)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
     return db_user_carona
 
 
-def delete_user_carona_from_db(db: Session, user_carona_id: int) -> UserCarona:
+def delete_user_carona_from_db(db: Session, user_carona_id: int) -> str:
     db_user_carona = get_user_carona_by_id(db, user_carona_id)
     if not db_user_carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="UserCarona not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não foi encontrado inscrito na carona.")
     
     try:
         db.delete(db_user_carona)
         db.commit()
     except SQLAlchemyError as sqlae:
-        msg = f"Could not delete UserCarona from the database: {sqlae}"
+        msg = f"CNão foi possível remover usuário da carona: {sqlae}"
         logging.error(msg)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
     return db_user_carona
