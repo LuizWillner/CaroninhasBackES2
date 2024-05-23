@@ -37,6 +37,7 @@ def create_pedido_carona(
             fk_user=current_user.id,
             hora_partida_maxima=hora_partida_maxima,
             hora_partida_minima=hora_partida_minima,
+            valor=valor_sugerido,
             # coord_partida=coord_partida,
             # coord_destino=coord_destino
         ),

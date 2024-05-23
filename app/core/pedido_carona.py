@@ -22,11 +22,12 @@ def add_pedido_carona_to_db(
     db: Annotated[Session, Depends(get_db)]
 ) -> PedidoCarona:
     db_pedido_carona = PedidoCarona(
+        fk_user = pedido_carona_to_add.fk_user,
         hora_partida_minima = pedido_carona_to_add.hora_partida_minima,
         hora_partida_maxima = pedido_carona_to_add.hora_partida_maxima,
+        valor=pedido_carona_to_add.valor,
         # coord_partida = pedido_carona_to_add.coord_partida,
         # coord_destino = pedido_carona_to_add.coord_destino,
-        fk_user = pedido_carona_to_add.fk_user
     )
     try:
         db.add(db_pedido_carona)
