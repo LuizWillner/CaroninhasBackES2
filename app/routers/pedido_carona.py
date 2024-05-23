@@ -19,7 +19,7 @@ from app.core.authentication import get_current_active_user
 from app.models.router_tags import RouterTags
 
 
-router = APIRouter(prefix="/pedido_carona", tags=[RouterTags.pedido_carona])
+router = APIRouter(prefix="/pedido-carona", tags=[RouterTags.pedido_carona])
 
 
 @router.post("", response_model=PedidoCaronaExtended)
@@ -54,7 +54,7 @@ def read_pedido_carona(
 ) -> PedidoCaronaExtended:
     pedido_carona = get_pedido_carona_by_id(db, pedido_carona_id)
     if not pedido_carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PedidoCarona not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido de Carona não encontrado.")
     return pedido_carona
 
 
