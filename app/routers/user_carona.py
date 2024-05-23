@@ -11,7 +11,6 @@ from app.utils.db_utils import get_db
 from app.core.user_carona import (
     add_user_carona_to_db, 
     get_user_carona_by_user_and_carona, 
-    get_user_caronas, 
     # update_user_carona_in_db, 
     delete_user_carona_from_db
 )
