@@ -49,21 +49,35 @@ def create_carona(
 def search_caronas(
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],  # precisa estar logado para usar o endpoint
+    motorista_id: int | None = Query(None, description="ID do motorista para filtrar as caronas de um motorista. Se nada for passado, as caronas não serão filtradas por motorista"),
     hora_minima: datetime = Query(datetime.now(), description="Hora mínima de partida da carona. Se nada for passado, será considerada a hora atual"),
     hora_maxima: datetime = Query(datetime(2500, 1, 1, 0, 0, 0), description="Hora máxima de partida da carona"),
-    valor_minimo: float = Query(0, description="Valor mínimo da carona"),
-    valor_maximo: float = Query(999999, description="Valor máximo da carona"),
+    valor_minimo: float = Query(0, description="Valor mínimo de preço da carona"),
+    valor_maximo: float = Query(999999, description="Valor máximo de preço da carona"),
     # local_partida: ?,
     # raio_partida: ? = x,
-    # local_chegada: ?,
-    # raio_chegada: ? = x
+    # local_destino: ?,
+    # raio_destino: ? = x
     order_by: CaronaOrderByOptions = Query(CaronaOrderByOptions.hora_partida, description="Como a query deve ser ordenada."),
     is_crescente: bool = Query(True, description="Indica se a ordenação deve ser feita em ordem crescente."),
     limite: int = Query(10, description="Limite de caronas retornadas pela query"),
     deslocamento: int = Query(0, description="Deslocamento (offset) da query. Os params _deslocamento_=1 e _limit_=10, por exemplo, indicam que a query retornará as caronas de 11 a 20, pulando as caronas de 1 a 10."),
 ) -> list[CaronaExtended]:
     filters = []
+    
+    if hora_minima > hora_maxima:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="hora_minima não pode ser maior que hora_maxima"
+        )
+    if valor_minimo > valor_maximo:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="valor_minimo não pode ser maior que hvalor_maximo"
+        )
 
+    if motorista_id is not None:
+        filters.append(Carona.fk_motorista == motorista_id)
     if hora_minima:
         filters.append(Carona.hora_partida >= hora_minima)
     if hora_maxima:
@@ -74,8 +88,8 @@ def search_caronas(
         filters.append(Carona.valor <= valor_maximo)
     # if local_partida:
     #     # filtra pelo local_partida com base no raio_partida
-    # if local_chegada: 
-    #     # filtra pelo local_chegada com base no raio_chegada
+    # if local_destino: 
+    #     # filtra pelo local_destino com base no raio_destino
 
     order_by_dict = CaronaOrderByOptions.get_order_by_dict()
     
