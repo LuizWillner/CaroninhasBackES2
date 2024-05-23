@@ -1,3 +1,4 @@
+from app.database.carona_orm import Carona
 from app.database.user_orm import User
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Annotated
@@ -5,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from datetime import datetime
 from app.database.user_carona_orm import UserCarona
-from app.models.user_carona_oop import UserCaronaBase, UserCaronaCreate, UserCaronaUpdate, UserCaronaExtended
+from app.models.user_carona_oop import UserCaronaBase, UserCaronaUpdate, UserCaronaExtended
 from app.utils.db_utils import get_db
 from app.core.user_carona import (
     add_user_carona_to_db, 
@@ -19,23 +20,21 @@ from app.core.authentication import get_current_active_user
 from app.models.router_tags import RouterTags
 
 
-router = APIRouter(prefix="/user_carona", tags=[RouterTags.user_carona])
+router = APIRouter(prefix="/user-carona", tags=[RouterTags.user_carona])
 
 
 @router.post("", response_model=UserCaronaExtended)
-def create_user_carona(
+def add_me_to_carona(
     current_user: Annotated[User, Depends(get_current_active_user)],
+    carona: Annotated[Carona, Depends(get_carona_by_id)],
     carona_id: int,
     db: Annotated[Session, Depends(get_db)]
 ) -> UserCaronaExtended:
-    carona = get_carona_by_id(db, carona_id)
-    if not carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Carona with id {carona_id} not found.")
+
     user_carona = add_user_carona_to_db(
-        user_carona_to_add=UserCaronaCreate(
+        user_carona_to_add=UserCaronaBase(
             fk_user=current_user.id,
             fk_carona=carona_id,
-            created_at=datetime.utcnow()
         ),
         db=db
     )

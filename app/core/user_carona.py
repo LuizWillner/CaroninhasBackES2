@@ -5,10 +5,10 @@ from fastapi import HTTPException, status
 from datetime import datetime
 
 from app.database.user_carona_orm import UserCarona
-from app.models.user_carona_oop import UserCaronaCreate, UserCaronaUpdate
+from app.models.user_carona_oop import UserCaronaBase, UserCaronaUpdate
 
 
-def add_user_carona_to_db(user_carona_to_add: UserCaronaCreate, db: Session) -> UserCarona:
+def add_user_carona_to_db(user_carona_to_add: UserCaronaBase, db: Session) -> UserCarona:
     db_user_carona = UserCarona(**user_carona_to_add.dict())
     try:
         db.add(db_user_carona)
