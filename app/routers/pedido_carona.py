@@ -49,7 +49,8 @@ def create_pedido_carona(
 @router.get("/{pedido_carona_id}", response_model=PedidoCaronaExtended)
 def read_pedido_carona(
     pedido_carona_id: int,
-    db: Annotated[Session, Depends(get_db)]
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)]  # precisa estar logado para usar o endpoint
 ) -> PedidoCaronaExtended:
     pedido_carona = get_pedido_carona_by_id(db, pedido_carona_id)
     if not pedido_carona:
