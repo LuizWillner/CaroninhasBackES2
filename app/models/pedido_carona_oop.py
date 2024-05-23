@@ -7,8 +7,8 @@ class PedidoCaronaBase(BaseModel):
     hora_partida_minima: datetime
     hora_partida_maxima: datetime
     valor: float
-    # coord_partida: str
-    # coord_destino: str
+    local_partida: str
+    local_chegada: str
 
 class PedidoCaronaCreate(PedidoCaronaBase):
     id: int

@@ -10,6 +10,8 @@ class CaronaBase(BaseModel):
     fk_motorista_veiculo: int
     hora_partida: datetime
     valor: float
+    local_partida: str
+    local_chegada: str
     
 class CaronaModel(CaronaBase):
     id: int
