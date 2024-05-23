@@ -68,15 +68,12 @@ def update_pedido_carona(
     return update_pedido_carona_in_db(db=db, pedido_carona_id=pedido_carona_id, pedido_carona=pedido_carona)
 
 
-class DeletePedidoCaronaResponse(BaseModel):
-    message: str
-
-
-@router.delete("/{pedido_carona_id}", response_model=DeletePedidoCaronaResponse)
+@router.delete("/{pedido_carona_id}", response_model=str)
 def delete_pedido_carona(
     pedido_carona_id: int,
-    db: Annotated[Session, Depends(get_db)]
-) -> PedidoCaronaExtended:
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)]  # precisa estar logado para usar o endpoint
+) -> str:
     return delete_pedido_carona_from_db(db=db, pedido_carona_id=pedido_carona_id)
 
 

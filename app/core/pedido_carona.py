@@ -68,20 +68,16 @@ def update_pedido_carona_in_db(db: Session, pedido_carona_id: int, pedido_carona
     return db_pedido_carona
 
 
-class SuccessResponse(BaseModel):
-    message: str
-
-
-def delete_pedido_carona_from_db(db: Session, pedido_carona_id: int) -> SuccessResponse:
+def delete_pedido_carona_from_db(db: Session, pedido_carona_id: int) -> str:
     db_pedido_carona = get_pedido_carona_by_id(db, pedido_carona_id)
     if not db_pedido_carona:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PedidoCarona not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido de Carona não encontrado.")
     
     try:
         db.delete(db_pedido_carona)
         db.commit()
     except SQLAlchemyError as sqlae:
-        msg = f"Could not delete PedidoCarona from the database: {sqlae}"
+        msg = f"Não foi possível deletar Pedido de Carona do banco: {sqlae}"
         logging.error(msg)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
-    return SuccessResponse(message="Pedido de Carona deletado com sucesso!")
+    return f"Pedido de Carona id={pedido_carona_id} deletado com sucesso!"
