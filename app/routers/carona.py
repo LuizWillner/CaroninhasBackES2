@@ -3,13 +3,16 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Annotated
 from sqlalchemy.orm import Session
+from app.core.authentication import get_current_active_user
 from app.database.carona_orm import Carona
-from app.database.user_orm import Motorista
+from app.database.user_orm import Motorista, User
 from app.database.veiculo_orm import MotoristaVeiculo
 
 from app.models.carona_oop import CaronaBase, CaronaExtended, CaronaUpdate
 
-from app.utils.db_utils import get_db
+from app.utils.db_utils import apply_limit_offset, get_db
+from app.utils.carona_utils import CaronaOrderByOptions
+
 from app.core.carona import add_carona_to_db, get_carona_by_id, remove_carona_from_db, update_carona_in_db
 from app.core.motorista import get_current_active_motorista
 from app.core.veiculo import get_motorista_veiculo_of_user
@@ -44,21 +47,22 @@ def create_carona(
 
 @router.get("", response_model=list[CaronaExtended])
 def search_caronas(
-    hora_minima: datetime = Query(None, description="Hora mínima de partida da carona"),
-    hora_maxima: datetime = Query(None, description="Hora máxima de partida da carona"),
-    valor_minimo: float = Query(None, description="Valor mínimo da carona"),
-    valor_maximo: float = Query(None, description="Valor máximo da carona"),
-    db: Session = Depends(get_db)
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)],  # precisa estar logado para usar o endpoint
+    hora_minima: datetime = Query(datetime(1900, 1, 1, 0, 0, 0), description="Hora mínima de partida da carona"),
+    hora_maxima: datetime = Query(datetime(2500, 1, 1, 0, 0, 0), description="Hora máxima de partida da carona"),
+    valor_minimo: float = Query(0, description="Valor mínimo da carona"),
+    valor_maximo: float = Query(999999, description="Valor máximo da carona"),
+    # local_partida: ?,
+    # raio_partida: ? = x,
+    # local_chegada: ?,
+    # raio_chegada: ? = x
+    order_by: CaronaOrderByOptions = Query(CaronaOrderByOptions.hora_partida, description="Como a query deve ser ordenada."),
+    is_crescente: bool = Query(True, description="Indica se a ordenação deve ser feita em ordem crescente."),
+    limite: int = Query(10, description="Limite de caronas retornadas pela query"),
+    deslocamento: int = Query(0, description="Deslocamento (offset) da query. Os params _deslocamento_=1 e _limit_=10, por exemplo, indicam que a query retornará as caronas de 11 a 20, pulando as caronas de 1 a 10."),
 ) -> list[CaronaExtended]:
     filters = []
-    if valor_minimo == None:
-        valor_minimo = 0
-    if valor_maximo == None:
-        valor_maximo = 999999
-    if hora_minima == None:
-        hora_minima = '1900-01-01 00:00:00.000000'
-    if hora_maxima == None:
-        hora_maxima = '2100-01-01 00:00:00.000000'
 
     if hora_minima:
         filters.append(Carona.hora_partida >= hora_minima)
@@ -68,8 +72,18 @@ def search_caronas(
         filters.append(Carona.valor >= valor_minimo)
     if valor_maximo:
         filters.append(Carona.valor <= valor_maximo)
+    # if local_partida:
+    #     # filtra pelo local_partida com base no raio_partida
+    # if local_chegada: 
+    #     # filtra pelo local_chegada com base no raio_chegada
 
-    caronas = db.query(Carona).filter(*filters).all()
+    order_by_dict = CaronaOrderByOptions.get_order_by_dict()
+    
+    caronas_query = db.query(Carona).filter(*filters).order_by(order_by_dict[order_by.value][is_crescente])
+    caronas_query = apply_limit_offset(query=caronas_query, limit=limite, offset=deslocamento)
+    
+    caronas = caronas_query.all()
+    
     return caronas
 
 
