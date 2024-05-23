@@ -1,3 +1,5 @@
+from app.core.user_carona import add_user_carona_to_db
+from app.database.carona_orm import Carona
 from app.database.user_orm import User
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Annotated
@@ -7,6 +9,7 @@ from pydantic import BaseModel
 
 from datetime import datetime, timedelta
 from app.models.pedido_carona_oop import PedidoCaronaBase, PedidoCaronaCreate, PedidoCaronaUpdate, PedidoCaronaExtended
+from app.models.user_carona_oop import UserCaronaBase
 from app.utils.db_utils import apply_limit_offset, get_db
 from app.core.pedido_carona import (
     add_pedido_carona_to_db, 
@@ -44,7 +47,34 @@ def create_pedido_carona(
         ),
         db=db
     )
+
+
+    caronas_query = (
+        db.query(Carona)
+        .filter(Carona.hora_partida >= hora_partida_minima, Carona.hora_partida <= hora_partida_maxima)
+        .all()
+    )
+
+    carona_escolhida = None
+    preco_mais_barato = float('inf')
+
+    for carona in caronas_query:
+        if carona.valor < valor_sugerido:
+            if carona.valor < preco_mais_barato:
+                carona_escolhida = carona
+                preco_mais_barato = carona.valor
+
+    if carona_escolhida:
+        add_user_carona_to_db(
+            user_carona_to_add=UserCaronaBase(
+                fk_user=current_user.id,
+                fk_carona=carona_escolhida.id
+            ),
+            db=db
+        )
+
     return pedido_carona
+
 
 
 @router.get("/{pedido_carona_id}", response_model=PedidoCaronaExtended)
@@ -132,3 +162,4 @@ def search_pedidos_carona(
     pedidos_caronas = pedidos_caronas_query.all()
     
     return pedidos_caronas
+
