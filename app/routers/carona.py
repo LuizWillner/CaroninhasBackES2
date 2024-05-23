@@ -49,7 +49,7 @@ def create_carona(
 def search_caronas(
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],  # precisa estar logado para usar o endpoint
-    hora_minima: datetime = Query(datetime(1900, 1, 1, 0, 0, 0), description="Hora mínima de partida da carona"),
+    hora_minima: datetime = Query(datetime.now(), description="Hora mínima de partida da carona. Se nada for passado, será considerada a hora atual"),
     hora_maxima: datetime = Query(datetime(2500, 1, 1, 0, 0, 0), description="Hora máxima de partida da carona"),
     valor_minimo: float = Query(0, description="Valor mínimo da carona"),
     valor_maximo: float = Query(999999, description="Valor máximo da carona"),
