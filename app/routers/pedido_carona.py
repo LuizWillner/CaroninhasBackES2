@@ -18,7 +18,9 @@ from app.core.pedido_carona import (
 from app.core.authentication import get_current_active_user
 from app.models.router_tags import RouterTags
 
+
 router = APIRouter(prefix="/pedido_carona", tags=[RouterTags.pedido_carona])
+
 
 @router.post("", response_model=PedidoCaronaExtended)
 def create_pedido_carona(
@@ -42,6 +44,7 @@ def create_pedido_carona(
     )
     return pedido_carona
 
+
 @router.get("/{pedido_carona_id}", response_model=PedidoCaronaExtended)
 def read_pedido_carona(
     pedido_carona_id: int,
@@ -61,6 +64,7 @@ def read_pedido_caronas(
 ) -> List[PedidoCaronaExtended]:
     return get_pedido_caronas(db, skip=skip, limit=limit)
 
+
 @router.put("/{pedido_carona_id}", response_model=PedidoCaronaExtended)
 def update_pedido_carona(
     pedido_carona_id: int,
@@ -69,8 +73,10 @@ def update_pedido_carona(
 ) -> PedidoCaronaExtended:
     return update_pedido_carona_in_db(db=db, pedido_carona_id=pedido_carona_id, pedido_carona=pedido_carona)
 
+
 class DeletePedidoCaronaResponse(BaseModel):
     message: str
+
 
 @router.delete("/{pedido_carona_id}", response_model=DeletePedidoCaronaResponse)
 def delete_pedido_carona(
@@ -78,6 +84,7 @@ def delete_pedido_carona(
     db: Annotated[Session, Depends(get_db)]
 ) -> PedidoCaronaExtended:
     return delete_pedido_carona_from_db(db=db, pedido_carona_id=pedido_carona_id)
+
 
 @router.get("", response_model=list[PedidoCaronaExtended])
 def search_caronas(
