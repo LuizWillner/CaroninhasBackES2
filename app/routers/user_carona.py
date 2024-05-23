@@ -73,12 +73,3 @@ def remove_me_from_carona(
     if not db_user_carona:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não foi encontrado inscrito na carona.")
     return delete_user_carona_from_db(db=db, db_user_carona=db_user_carona)
-
-
-@router.get("", response_model=list[UserCaronaExtended])
-def search_caronas_historico(
-    current_user: Annotated[User, Depends(get_current_active_user)],
-    db: Session = Depends(get_db)
-) -> list[UserCaronaExtended]:
-    caronas = db.query(UserCarona).filter(UserCarona.fk_user == current_user.id).all()
-    return caronas

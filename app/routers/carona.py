@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Annotated
@@ -160,3 +160,44 @@ def delete_carona(
     remove_carona_from_db(db_carona=carona, db=db)
     
     return f"Carona id={carona_id} removida com sucesso"
+
+
+@router.get("/historico/me/motorista", response_model=list[CaronaExtended])
+def get_my_historico_as_motorista(
+    current_motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
+    db: Annotated[Session, Depends(get_db)],
+    data_minima: datetime = Query(datetime.now()-timedelta(days=365), description="Data mínima de partida da carona. Se nada for passado, será considerada a data atual-1ano"),
+    data_maxima: datetime = Query(datetime.now()+timedelta(days=365), description="Data máxima de partida da carona. Se nada for passado, será considerada a data atual+1ano"),
+    limite: int = Query(10, description="Limite de caronas retornadas pela query"),
+    deslocamento: int = Query(0, description="Deslocamento (offset) da query. Os params _deslocamento_=1 e _limit_=10, por exemplo, indicam que a query retornará as caronas de 11 a 20, pulando as caronas de 1 a 10."),
+) -> list[CaronaExtended]:
+    filters = []
+    
+    if data_minima > data_maxima:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="data_minima não pode ser maior que data_maxima"
+        )
+    
+    filters.append(Carona.fk_motorista == current_motorista.id_fk_user)
+    if data_minima:
+        filters.append(Carona.hora_partida >= data_minima)
+    if data_maxima:
+        filters.append(Carona.hora_partida <= data_maxima)
+    
+    order_by_dict = CaronaOrderByOptions.get_order_by_dict()
+    
+    caronas_query = db.query(Carona).filter(*filters).order_by(order_by_dict[CaronaOrderByOptions.hora_partida.value][False])
+    caronas_query = apply_limit_offset(query=caronas_query, limit=limite, offset=deslocamento)
+    
+    caronas = caronas_query.all()
+    
+    return caronas
+
+
+@router.get("/historico/me/passageiro", response_model=list[CaronaExtended])
+def get_my_historico_as_passageiro(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Session = Depends(get_db)
+) -> list[CaronaExtended]:
+    return 
