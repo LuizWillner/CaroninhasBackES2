@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from app.database.pedido_carona_orm import PedidoCarona
 from pydantic import BaseModel
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.models.pedido_carona_oop import PedidoCaronaBase, PedidoCaronaCreate, PedidoCaronaUpdate, PedidoCaronaExtended
-from app.utils.db_utils import get_db
+from app.utils.db_utils import apply_limit_offset, get_db
 from app.core.pedido_carona import (
     add_pedido_carona_to_db, 
     get_pedido_carona_by_id, 
@@ -17,6 +17,7 @@ from app.core.pedido_carona import (
 )
 from app.core.authentication import get_current_active_user
 from app.models.router_tags import RouterTags
+from app.utils.pedido_carona_utils import PedidoCaronaOrderByOptions
 
 
 router = APIRouter(prefix="/pedido-carona", tags=[RouterTags.pedido_carona])
@@ -78,27 +79,56 @@ def delete_pedido_carona(
 
 
 @router.get("", response_model=list[PedidoCaronaExtended])
-def search_caronas(
-    hora_minima: datetime = Query(None, description="Hora mínima de partida da carona"),
-    hora_maxima: datetime = Query(None, description="Hora máxima de partida da carona"),
-    coord_partida: str = Query(None, description="Coordenada de partida da carona"),
-    coord_destino: str = Query(None, description="Coordenada de destino da carona"),
-    db: Session = Depends(get_db)
+def search_pedidos_carona(
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    user_id: int | None = Query(None, description="ID do usuário para filtrar os pedidos feitos por um usuário. Se nada for passado, os pedidos não serão filtrados por usuário"),
+    hora_minima: datetime = Query(datetime.now()-timedelta(hours=12), description="Hora mínima de partida para filtrar os pedidos. Se nada for passado, será considerada a hora atual-12h"),
+    hora_maxima: datetime = Query(datetime(2500, 1, 1, 0, 0, 0), description="Hora máxima de partida para filtrar os pedidos"),
+    valor_minimo: float = Query(0, description="Valor mínimo de preço do pedido de carona"),
+    valor_maximo: float = Query(999999, description="Valor máximo de preço pedido de carona"),
+    # local_partida: ?? = Query(),
+    # raio_partida: ?? = Query(),
+    # local_destino: ?? = Query(),
+    order_by: PedidoCaronaOrderByOptions = Query(PedidoCaronaOrderByOptions.hora_minima_partida, description="Como a query deve ser ordenada."),
+    is_crescente: bool = Query(True, description="Indica se a ordenação deve ser feita em ordem crescente."),
+    limite: int = Query(10, description="Limite de pedidos de carona retornados pela query"),
+    deslocamento: int = Query(0, description="Deslocamento (offset) da query. Os params _deslocamento_=1 e _limit_=10, por exemplo, indicam que a query retornará os pedidos de 11 a 20, pulando os pedidos de 1 a 10."),
 ) -> list[PedidoCaronaExtended]:
+    
+    if hora_minima > hora_maxima:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="hora_minima não pode ser maior que hora_maxima"
+        )
+    if valor_minimo > valor_maximo:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="valor_minimo não pode ser maior que hvalor_maximo"
+        )
+    
     filters = []
-    if hora_minima == None:
-        hora_minima = '1900-01-01 00:00:00.000000'
-    if hora_maxima == None:
-        hora_maxima = '2100-01-01 00:00:00.000000'
 
+    if user_id is not None:
+        filters.append(PedidoCarona.fk_user == user_id)
     if hora_minima:
         filters.append(PedidoCarona.hora_partida_minima >= hora_minima)
     if hora_maxima:
         filters.append(PedidoCarona.hora_partida_maxima <= hora_maxima)
-
-    filters.append(PedidoCarona.coord_partida  == coord_partida)
+    if valor_minimo:
+        filters.append(PedidoCarona.valor >= valor_minimo)
+    if valor_maximo:
+        filters.append(PedidoCarona.valor <= valor_maximo)
+    # if local_partida:
+    #     # filtra pelo local_partida com base no raio_partida
+    # if local_destino: 
+    #     # filtra pelo local_destino com base no raio_destino
     
-    filters.append(PedidoCarona.coord_destino == coord_destino)
+    order_by_dict = PedidoCaronaOrderByOptions.get_order_by_dict()
 
-    caronas = db.query(PedidoCarona).filter(*filters).all()
-    return caronas
+    pedidos_caronas_query = db.query(PedidoCarona).filter(*filters).order_by(order_by_dict[order_by.value][is_crescente])
+    pedidos_caronas_query = apply_limit_offset(query=pedidos_caronas_query, limit=limite, offset=deslocamento)
+    
+    pedidos_caronas = pedidos_caronas_query.all()
+    
+    return pedidos_caronas
