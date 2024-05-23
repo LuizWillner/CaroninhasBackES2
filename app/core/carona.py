@@ -23,12 +23,7 @@ def add_carona_to_db(
     carona_to_add: CaronaBase,
     db: Annotated[Session, Depends(get_db)]
 ) -> Carona:
-    db_carona = Carona(
-        fk_motorista = carona_to_add.fk_motorista,
-        fk_motorista_veiculo = carona_to_add.fk_motorista_veiculo,
-        hora_partida = carona_to_add.hora_partida,
-        valor=carona_to_add.valor
-    )
+    db_carona = Carona(**carona_to_add.model_dump())
     try:
         db.add(db_carona)
         db.commit()
@@ -55,12 +50,8 @@ def update_carona_in_db(
     carona_new_info: CaronaUpdate,
     db: Annotated[Session, Depends(get_db)]
 ) -> Carona:
-    if carona_new_info.fk_motorista_veiculo is not None:
-        db_carona.fk_motorista_veiculo = carona_new_info.fk_motorista_veiculo
-    if carona_new_info.hora_partida is not None:
-        db_carona.hora_partida = carona_new_info.hora_partida
-    if carona_new_info.valor is not None:
-        db_carona.valor = carona_new_info.valor
+    for key, value in carona_new_info.model_dump(exclude_none=True).items():
+        setattr(db_carona, key, value)
     
     try:
         db.add(db_carona)
