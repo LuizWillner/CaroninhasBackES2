@@ -18,7 +18,9 @@ from app.core.carona import get_carona_by_id
 from app.core.authentication import get_current_active_user
 from app.models.router_tags import RouterTags
 
+
 router = APIRouter(prefix="/user_carona", tags=[RouterTags.user_carona])
+
 
 @router.post("", response_model=UserCaronaExtended)
 def create_user_carona(
@@ -39,6 +41,7 @@ def create_user_carona(
     )
     return user_carona
 
+
 @router.get("/{user_carona_id}", response_model=UserCaronaExtended)
 def read_user_carona(
     user_carona_id: int,
@@ -49,6 +52,7 @@ def read_user_carona(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="UserCarona not found.")
     return user_carona
 
+
 @router.get("/", response_model=List[UserCaronaExtended])
 def read_user_caronas(
     db: Annotated[Session, Depends(get_db)],
@@ -56,6 +60,7 @@ def read_user_caronas(
     limit: int = 10
 ) -> List[UserCaronaExtended]:
     return get_user_caronas(db, skip=skip, limit=limit)
+
 
 @router.put("/{user_carona_id}", response_model=UserCaronaExtended)
 def update_user_carona(
@@ -65,12 +70,14 @@ def update_user_carona(
 ) -> UserCaronaExtended:
     return update_user_carona_in_db(db=db, user_carona_id=user_carona_id, user_carona=user_carona)
 
+
 @router.delete("/{user_carona_id}", response_model=UserCaronaExtended)
 def delete_user_carona(
     user_carona_id: int,
     db: Annotated[Session, Depends(get_db)]
 ) -> UserCaronaExtended:
     return delete_user_carona_from_db(db=db, user_carona_id=user_carona_id)
+
 
 @router.get("", response_model=list[UserCaronaExtended])
 def search_caronas_historico(
