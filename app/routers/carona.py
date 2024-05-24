@@ -6,6 +6,7 @@ from sqlalchemy import func
 
 from app.core.authentication import get_current_active_user
 from app.database.carona_orm import Carona
+from app.database.pedido_carona_orm import PedidoCarona
 from app.database.user_carona_orm import UserCarona
 from app.database.user_orm import Motorista, User
 from app.database.veiculo_orm import MotoristaVeiculo
@@ -270,3 +271,35 @@ def get_my_historico_as_passageiro(
     caronas = caronas_query.all()
     
     return caronas
+
+@router.post("/caronas/from_pedido/", response_model=CaronaExtended)
+def create_carona_from_pedido(
+    pedido_carona_id: int,
+    db: Annotated[Session, Depends(get_db)], 
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    veiculo_id: int = Query()
+    ):
+    pedido_carona = db.query(PedidoCarona).filter(PedidoCarona.id == pedido_carona_id).first()
+    if not pedido_carona:
+        raise HTTPException(status_code=404, detail="Pedido de carona não encontrado")
+
+    nova_carona = Carona(
+        hora_partida=pedido_carona.hora_partida_minima,
+        local_partida=pedido_carona.local_partida,
+        fk_motorista_veiculo=veiculo_id,
+        fk_motorista=current_user.id,
+        local_destino=pedido_carona.local_destino,
+        valor=pedido_carona.valor
+    )
+    db.add(nova_carona)
+    db.commit()
+    db.refresh(nova_carona)
+    
+    user_carona = UserCarona(
+        fk_user=pedido_carona.fk_user,
+        fk_carona=nova_carona.id
+    )
+    db.add(user_carona)
+    db.commit()
+    
+    return nova_carona
