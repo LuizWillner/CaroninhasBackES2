@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.core.authentication import get_current_active_user
+from app.core.pedido_carona import get_pedido_carona_by_id
 from app.database.carona_orm import Carona
 from app.database.pedido_carona_orm import PedidoCarona
 from app.database.user_carona_orm import UserCarona
@@ -272,19 +273,22 @@ def get_my_historico_as_passageiro(
     
     return caronas
 
-@router.post("/caronas/from_pedido/", response_model=CaronaExtended)
+@router.post("/caronas/pedido/{pedido_carona_id}", response_model=CaronaExtended)
 def create_carona_from_pedido(
-    pedido_carona_id: int,
+    pedido_carona: Annotated[PedidoCarona, Depends(get_pedido_carona_by_id)],
     db: Annotated[Session, Depends(get_db)], 
     current_user: Annotated[User, Depends(get_current_active_user)],
-    veiculo_id: int = Query()
-    ):
-    pedido_carona = db.query(PedidoCarona).filter(PedidoCarona.id == pedido_carona_id).first()
+    veiculo_id: int = Query(),
+    hora_de_partida: datetime = Query(),
+) -> CaronaExtended:
     if not pedido_carona:
         raise HTTPException(status_code=404, detail="Pedido de carona não encontrado")
 
+    if hora_de_partida < pedido_carona.hora_partida_minima or hora_de_partida > pedido_carona.hora_partida_maxima:
+        raise HTTPException(status_code=400, detail="Hora de partida deve respeitar o intervalo sugerido no pedido da carona.")
+
     nova_carona = Carona(
-        hora_partida=pedido_carona.hora_partida_minima,
+        hora_partida=hora_de_partida,
         local_partida=pedido_carona.local_partida,
         fk_motorista_veiculo=veiculo_id,
         fk_motorista=current_user.id,
