@@ -1,16 +1,26 @@
-from app.core.user_carona import add_user_carona_to_db
-from app.database.carona_orm import Carona
-from app.database.user_orm import User
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from typing import List, Annotated
+from sqlalchemy import func
 from sqlalchemy.orm import Session
-from app.database.pedido_carona_orm import PedidoCarona
 from pydantic import BaseModel
-
+from typing import List, Annotated
 from datetime import datetime, timedelta
-from app.models.pedido_carona_oop import PedidoCaronaBase, PedidoCaronaBasePartidaDestino, PedidoCaronaCreate, PedidoCaronaUpdate, PedidoCaronaExtended
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
+
+from app.database.user_orm import User
+from app.database.carona_orm import Carona
+from app.database.pedido_carona_orm import PedidoCarona
+
+from app.models.router_tags import RouterTags
 from app.models.user_carona_oop import UserCaronaBase
+from app.models.pedido_carona_oop import (
+    PedidoCaronaBase, PedidoCaronaBasePartidaDestino, PedidoCaronaCreate, 
+    PedidoCaronaUpdate, PedidoCaronaExtended
+)
+
+from app.utils.pedido_carona_utils import PedidoCaronaOrderByOptions
 from app.utils.db_utils import apply_limit_offset, get_db
+
+from app.core.user_carona import add_user_carona_to_db
+from app.core.authentication import get_current_active_user
 from app.core.pedido_carona import (
     add_pedido_carona_to_db, 
     get_pedido_carona_by_id, 
@@ -18,9 +28,6 @@ from app.core.pedido_carona import (
     update_pedido_carona_in_db, 
     delete_pedido_carona_from_db
 )
-from app.core.authentication import get_current_active_user
-from app.models.router_tags import RouterTags
-from app.utils.pedido_carona_utils import PedidoCaronaOrderByOptions
 
 
 router = APIRouter(prefix="/pedido-carona", tags=[RouterTags.pedido_carona])
@@ -33,7 +40,7 @@ def create_pedido_carona(
     hora_partida_minima: datetime = Query(datetime.now()),
     hora_partida_maxima: datetime = Query(),
     valor_sugerido: float = Query(),
-    partida_destino: PedidoCaronaBasePartidaDestino = Query(),
+    partida_destino: PedidoCaronaBasePartidaDestino = Body(),
 ) -> PedidoCaronaExtended:
     pedido_carona = add_pedido_carona_to_db(
         pedido_carona_to_add=PedidoCaronaBase(
@@ -46,7 +53,6 @@ def create_pedido_carona(
         ),
         db=db
     )
-
 
     caronas_query = (
         db.query(Carona)
@@ -107,7 +113,16 @@ def delete_pedido_carona(
     return delete_pedido_carona_from_db(db=db, pedido_carona_id=pedido_carona_id)
 
 
-@router.get("", response_model=list[PedidoCaronaExtended])
+description_search_pedidos_caronas = (
+    '''
+    **Importante**  \\
+    - Os endereços armazenados no banco de dados são strings, e não coordenadas geográficas. Eles possuem um formato específico que segue o padrão do Google Maps.\\
+    ---- Exemplo: "R. Passo da Pátria, 152-470 - São Domingos, Niterói - RJ, 24210-240"\\
+    - A filtragem por _keyword_partida_ e _keyword_destino_ é feita por meio de uma busca textual, isto é, a query retornará as caronas cujo local de partida ou destino contém a palavra chave passada.\\
+    ---- Exemplo: se _keyword_partida_="Ipanema", a query retornará as caronas cujo local de partida contém a palavra "Ipanema" (ex: "Ipanema, Rio de Janeiro").
+    '''
+)
+@router.get("", response_model=list[PedidoCaronaExtended], description=description_search_pedidos_caronas)
 def search_pedidos_carona(
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
@@ -116,9 +131,10 @@ def search_pedidos_carona(
     hora_maxima: datetime = Query(datetime.now()-timedelta(days=365), description="Hora máxima de partida para filtrar os pedidos. Se nada for passado, será considerada a hora atual+1ano"),
     valor_minimo: float = Query(0, description="Valor mínimo de preço do pedido de carona"),
     valor_maximo: float = Query(999999, description="Valor máximo de preço pedido de carona"),
-    local_partida: str = Query("", description="Local de partida do pedido de carona. Se nada for passado, não será filtrado por local de partida."),
-    # raio_partida: ?? = Query(),
-    local_destino: str = Query("", description="Local de destino do pedido de carona. Se nada for passado, não será filtrado por local de destino."),
+    keyword_partida: str = Query(None, description="Palavra chave para filtrar os endereços de partida."),
+    # raio_partida: ? = x,
+    keyword_destino: str = Query(None, description="Palavra chave para filtrar os endereços destinos."),
+    # raio_destino: ? = x
     order_by: PedidoCaronaOrderByOptions = Query(PedidoCaronaOrderByOptions.hora_minima_partida, description="Como a query deve ser ordenada."),
     is_crescente: bool = Query(True, description="Indica se a ordenação deve ser feita em ordem crescente."),
     limite: int = Query(10, description="Limite de pedidos de carona retornados pela query"),
@@ -148,10 +164,10 @@ def search_pedidos_carona(
         filters.append(PedidoCarona.valor >= valor_minimo)
     if valor_maximo:
         filters.append(PedidoCarona.valor <= valor_maximo)
-    # if local_partida:
-    #     # filtra pelo local_partida com base no raio_partida
-    # if local_destino: 
-    #     # filtra pelo local_destino com base no raio_destino
+    if keyword_partida:
+        filters.append(func.upper(PedidoCarona.local_partida).contains(keyword_partida.upper()))
+    if keyword_destino: 
+        filters.append(func.upper(PedidoCarona.local_destino).contains(keyword_destino.upper()))
     
     order_by_dict = PedidoCaronaOrderByOptions.get_order_by_dict()
 

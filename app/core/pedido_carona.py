@@ -35,7 +35,7 @@ def add_pedido_carona_to_db(
     return db_pedido_carona
 
 
-def get_pedido_carona_by_id(db: Session, pedido_carona_id: int) -> PedidoCarona:
+def get_pedido_carona_by_id(db: Annotated[Session, Depends(get_db)], pedido_carona_id: int) -> PedidoCarona:
     return db.query(PedidoCarona).filter(PedidoCarona.id == pedido_carona_id).first()
 
 
