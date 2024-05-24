@@ -8,7 +8,7 @@ from app.database.pedido_carona_orm import PedidoCarona
 from pydantic import BaseModel
 
 from datetime import datetime, timedelta
-from app.models.pedido_carona_oop import PedidoCaronaBase, PedidoCaronaCreate, PedidoCaronaUpdate, PedidoCaronaExtended
+from app.models.pedido_carona_oop import PedidoCaronaBase, PedidoCaronaBasePartidaDestino, PedidoCaronaCreate, PedidoCaronaUpdate, PedidoCaronaExtended
 from app.models.user_carona_oop import UserCaronaBase
 from app.utils.db_utils import apply_limit_offset, get_db
 from app.core.pedido_carona import (
@@ -33,18 +33,16 @@ def create_pedido_carona(
     hora_partida_minima: datetime = Query(datetime.now()),
     hora_partida_maxima: datetime = Query(),
     valor_sugerido: float = Query(),
-    local_partida: str = Query(),
-    local_destino: str = Query()
+    partida_destino: PedidoCaronaBasePartidaDestino = Query(),
 ) -> PedidoCaronaExtended:
-    print(f"local_partida: {local_partida}, local_destino: {local_destino}")
     pedido_carona = add_pedido_carona_to_db(
         pedido_carona_to_add=PedidoCaronaBase(
             fk_user=current_user.id,
             hora_partida_maxima=hora_partida_maxima,
             hora_partida_minima=hora_partida_minima,
             valor=valor_sugerido,
-            local_partida=local_partida,
-            local_destino=local_destino
+            local_partida=partida_destino.local_partida,
+            local_destino=partida_destino.local_destino
         ),
         db=db
     )
