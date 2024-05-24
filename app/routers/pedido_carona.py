@@ -32,18 +32,19 @@ def create_pedido_carona(
     db: Annotated[Session, Depends(get_db)],
     hora_partida_minima: datetime = Query(datetime.now()),
     hora_partida_maxima: datetime = Query(),
-    valor_sugerido: float = Query()
-    # coord_partida: str,
-    # coord_destino: str,
+    valor_sugerido: float = Query(),
+    local_partida: str = Query(),
+    local_destino: str = Query()
 ) -> PedidoCaronaExtended:
+    print(f"local_partida: {local_partida}, local_destino: {local_destino}")
     pedido_carona = add_pedido_carona_to_db(
         pedido_carona_to_add=PedidoCaronaBase(
             fk_user=current_user.id,
             hora_partida_maxima=hora_partida_maxima,
             hora_partida_minima=hora_partida_minima,
             valor=valor_sugerido,
-            # coord_partida=coord_partida,
-            # coord_destino=coord_destino
+            local_partida=local_partida,
+            local_destino=local_destino
         ),
         db=db
     )
@@ -117,9 +118,9 @@ def search_pedidos_carona(
     hora_maxima: datetime = Query(datetime.now()-timedelta(days=365), description="Hora máxima de partida para filtrar os pedidos. Se nada for passado, será considerada a hora atual+1ano"),
     valor_minimo: float = Query(0, description="Valor mínimo de preço do pedido de carona"),
     valor_maximo: float = Query(999999, description="Valor máximo de preço pedido de carona"),
-    # local_partida: ?? = Query(),
+    local_partida: str = Query("", description="Local de partida do pedido de carona. Se nada for passado, não será filtrado por local de partida."),
     # raio_partida: ?? = Query(),
-    # local_destino: ?? = Query(),
+    local_destino: str = Query("", description="Local de destino do pedido de carona. Se nada for passado, não será filtrado por local de destino."),
     order_by: PedidoCaronaOrderByOptions = Query(PedidoCaronaOrderByOptions.hora_minima_partida, description="Como a query deve ser ordenada."),
     is_crescente: bool = Query(True, description="Indica se a ordenação deve ser feita em ordem crescente."),
     limite: int = Query(10, description="Limite de pedidos de carona retornados pela query"),

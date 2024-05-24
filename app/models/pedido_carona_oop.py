@@ -23,6 +23,8 @@ class PedidoCaronaUpdate(BaseModel):
     hora_partida_minima: datetime | None = None
     hora_partida_maxima: datetime | None = None
     valor: float | None = None
+    local_partida: str | None = None
+    local_destino: str | None = None
 
 class PedidoCaronaExtended(PedidoCaronaCreate):
     user: UserModel
