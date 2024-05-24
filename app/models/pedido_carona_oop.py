@@ -3,13 +3,15 @@ from datetime import datetime
 from app.models.user_oop import UserModel
 
 
-class PedidoCaronaBase(BaseModel):
+class PedidoCaronaBasePartidaDestino(BaseModel):
+    local_partida: str
+    local_destino: str
+
+class PedidoCaronaBase(PedidoCaronaBasePartidaDestino):
     fk_user: int
     hora_partida_minima: datetime
     hora_partida_maxima: datetime
     valor: float
-    local_partida: str
-    local_destino: str
 
 class PedidoCaronaCreate(PedidoCaronaBase):
     id: int
@@ -18,6 +20,7 @@ class PedidoCaronaCreate(PedidoCaronaBase):
     
     class Config:
         orm_mode = True
+        from_attributes = True
     
 class PedidoCaronaUpdate(BaseModel):
     hora_partida_minima: datetime | None = None
@@ -28,4 +31,7 @@ class PedidoCaronaUpdate(BaseModel):
 
 class PedidoCaronaExtended(PedidoCaronaCreate):
     user: UserModel
+    
+class PedidoCaronaCreateWithDetail(PedidoCaronaCreate):
+    sucesso_insercao: bool | None = None
     
