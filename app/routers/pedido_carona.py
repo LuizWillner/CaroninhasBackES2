@@ -1,4 +1,5 @@
-from sqlalchemy import func
+import logging
+from sqlalchemy import func, asc
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Annotated
@@ -12,12 +13,12 @@ from app.database.pedido_carona_orm import PedidoCarona
 from app.models.router_tags import RouterTags
 from app.models.user_carona_oop import UserCaronaBase
 from app.models.pedido_carona_oop import (
-    PedidoCaronaBase, PedidoCaronaBasePartidaDestino, PedidoCaronaCreate, 
+    PedidoCaronaBase, PedidoCaronaBasePartidaDestino, PedidoCaronaCreate, PedidoCaronaCreateWithDetail, 
     PedidoCaronaUpdate, PedidoCaronaExtended
 )
 
 from app.utils.pedido_carona_utils import PedidoCaronaOrderByOptions
-from app.utils.db_utils import apply_limit_offset, get_db
+from app.utils.db_utils import apply_limit_offset, get_db, orm_to_dict
 
 from app.core.user_carona import add_user_carona_to_db
 from app.core.authentication import get_current_active_user
@@ -33,7 +34,7 @@ from app.core.pedido_carona import (
 router = APIRouter(prefix="/pedido-carona", tags=[RouterTags.pedido_carona])
 
 
-@router.post("", response_model=PedidoCaronaExtended)
+@router.post("", response_model=PedidoCaronaCreateWithDetail)
 def create_pedido_carona(
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
@@ -41,8 +42,17 @@ def create_pedido_carona(
     hora_partida_maxima: datetime = Query(),
     valor_sugerido: float = Query(),
     partida_destino: PedidoCaronaBasePartidaDestino = Body(),
-) -> PedidoCaronaExtended:
-    pedido_carona = add_pedido_carona_to_db(
+    inserir_automatico: bool = Query(False, description="Indica se o sistema deve tentar inserir automaticamente o usuário em uma carona que atenda aos critérios do pedido. Se True, os params _keyword_partida_ e _keyword_destino_ devem ser fornecidos."),
+    keyword_partida: str = Query(None, description="Caso _inserir_automatico_=True, o usuário será adicionado numa carona que contenha essa palavra chave no endereço de partida."),
+    keyword_destino: str = Query(None, description="Caso _inserir_automatico_=True, o usuário será adicionado numa carona que contenha essa palavra chave no endereço de partida."),
+) -> PedidoCaronaCreateWithDetail:
+    if inserir_automatico and not (keyword_partida and keyword_destino):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Se inserir_automatico=True, os params keyword_partida e keyword_destino devem ser fornecidos."
+        )
+        
+    db_pedido_carona = add_pedido_carona_to_db(
         pedido_carona_to_add=PedidoCaronaBase(
             fk_user=current_user.id,
             hora_partida_maxima=hora_partida_maxima,
@@ -53,32 +63,46 @@ def create_pedido_carona(
         ),
         db=db
     )
+    
+    try:
+        if inserir_automatico:
+            carona_escolhida = (
+                db.query(Carona)
+                .filter(
+                    Carona.hora_partida >= hora_partida_minima,
+                    Carona.hora_partida <= hora_partida_maxima,
+                    func.upper(Carona.local_partida).contains(keyword_partida.upper()),
+                    func.upper(Carona.local_destino).contains(keyword_destino.upper()),
+                    Carona.valor <= valor_sugerido
+                )
+                .order_by(asc(Carona.valor))
+                .first()
+            )
 
-    caronas_query = (
-        db.query(Carona)
-        .filter(Carona.hora_partida >= hora_partida_minima, Carona.hora_partida <= hora_partida_maxima)
-        .all()
-    )
-
-    carona_escolhida = None
-    preco_mais_barato = float('inf')
-
-    for carona in caronas_query:
-        if carona.valor < valor_sugerido:
-            if carona.valor < preco_mais_barato:
-                carona_escolhida = carona
-                preco_mais_barato = carona.valor
-
-    if carona_escolhida:
-        add_user_carona_to_db(
-            user_carona_to_add=UserCaronaBase(
-                fk_user=current_user.id,
-                fk_carona=carona_escolhida.id
-            ),
-            db=db
+            pedido_carona_model = PedidoCaronaCreate.from_orm(db_pedido_carona)
+            response_pedido_carona = PedidoCaronaCreateWithDetail(**pedido_carona_model.model_dump(), sucesso_insercao=False)
+            if carona_escolhida:
+                db_user_carona = add_user_carona_to_db(
+                    user_carona_to_add=UserCaronaBase(
+                        fk_user=current_user.id,
+                        fk_carona=carona_escolhida.id
+                    ),
+                    db=db
+                )
+                if db_user_carona:
+                    response_pedido_carona.sucesso_insercao = True
+                    
+    except Exception as e:
+        db.rollback()
+        db.delete(db_pedido_carona)
+        db.commit()
+        logging.error(f"Erro ao tentar inserir automaticamente o usuário numa carona: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao tentar inserir automaticamente o usuário numa carona: {e}"
         )
 
-    return pedido_carona
+    return response_pedido_carona
 
 
 
