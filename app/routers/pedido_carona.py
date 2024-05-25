@@ -18,7 +18,7 @@ from app.models.pedido_carona_oop import (
 )
 
 from app.utils.pedido_carona_utils import PedidoCaronaOrderByOptions
-from app.utils.db_utils import apply_limit_offset, get_db, orm_to_dict
+from app.utils.db_utils import apply_limit_offset, get_db
 
 from app.core.user_carona import add_user_carona_to_db
 from app.core.authentication import get_current_active_user
