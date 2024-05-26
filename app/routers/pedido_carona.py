@@ -6,6 +6,7 @@ from typing import List, Annotated
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
 
+from app.database.user_carona_orm import UserCarona
 from app.database.user_orm import User
 from app.database.carona_orm import Carona
 from app.database.pedido_carona_orm import PedidoCarona
@@ -66,14 +67,21 @@ def create_pedido_carona(
     
     try:
         if inserir_automatico:
+            vagas_subquery = (
+                db.query(UserCarona.fk_carona, func.count(UserCarona.fk_user).label("num_passageiros"))
+                .group_by(UserCarona.fk_carona)
+                .subquery()
+            )
             carona_escolhida = (
                 db.query(Carona)
+                .outerjoin(vagas_subquery, Carona.id == vagas_subquery.c.fk_carona)
                 .filter(
                     Carona.hora_partida >= hora_partida_minima,
                     Carona.hora_partida <= hora_partida_maxima,
                     func.upper(Carona.local_partida).contains(keyword_partida.upper()),
                     func.upper(Carona.local_destino).contains(keyword_destino.upper()),
-                    Carona.valor <= valor_sugerido
+                    Carona.valor <= valor_sugerido,
+                    Carona.vagas - func.coalesce(vagas_subquery.c.num_passageiros, 0) >= 1  # filra as caronas que possuem pelo menos 1 vaga disponível
                 )
                 .order_by(asc(Carona.valor))
                 .first()
@@ -87,6 +95,7 @@ def create_pedido_carona(
                         fk_user=current_user.id,
                         fk_carona=carona_escolhida.id
                     ),
+                    db_carona=carona_escolhida,
                     db=db
                 )
                 if db_user_carona:
