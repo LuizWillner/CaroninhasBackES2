@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
 
+from app.database.user_carona_orm import UserCarona
 from app.utils.db_utils import get_db
 
 from app.database.carona_orm import Carona
@@ -50,6 +51,12 @@ def update_carona_in_db(
     carona_new_info: CaronaUpdate,
     db: Annotated[Session, Depends(get_db)]
 ) -> Carona:
+    vagas_preenchidas = db.query(UserCarona).filter(UserCarona.fk_carona == db_carona.id).count()
+    if vagas_preenchidas > carona_new_info.vagas:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Não é possível diminuir o número de vagas disponíveis para uum número menor do que o número de vagas já preenchidas."
+        )
     for key, value in carona_new_info.model_dump(exclude_none=True).items():
         setattr(db_carona, key, value)
     
