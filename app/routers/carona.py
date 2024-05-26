@@ -209,15 +209,17 @@ def delete_carona(
     carona_id: int,
     motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
     db: Annotated[Session, Depends(get_db)],
+    enforce: bool = False,
 )-> str:
     '''
-    - Remove a carona criada pelo usuário passando seu id em _carona_id_
+    - Remove a carona criada pelo usuário passando seu id em _carona_id_.
+    - Caso _enforce_=False, a carona só será removida se não houver passageiros inscritos. Caso contrário, a carona será removida independentemente de haver passageiros ou não.
     - Retorna uma mensagem "Carona id={_carona_id_} removida com sucesso" caso a carona seja removida
     '''
     if carona.fk_motorista != motorista.id_fk_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Carona id={carona_id} não encontrada.")
 
-    remove_carona_from_db(db_carona=carona, db=db)
+    remove_carona_from_db(db_carona=carona, db=db, enforce=enforce)
     
     return f"Carona id={carona_id} removida com sucesso"
 

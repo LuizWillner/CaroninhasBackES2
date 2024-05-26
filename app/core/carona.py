@@ -73,10 +73,18 @@ def update_carona_in_db(
 
 def remove_carona_from_db(
     db_carona: Carona,
-    db: Annotated[Session, Depends(get_db)]
+    db: Annotated[Session, Depends(get_db)],
+    enforce: bool = False
 ) -> Carona:
+    vagas_preenchidas = db.query(UserCarona).filter(UserCarona.fk_carona == db_carona.id).count()
+    if vagas_preenchidas > 0 and not enforce:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Não foi possível remover a carona pois ela possui passageiros inscritos. Para removê-la, use o parâmetro 'enforce=True'."
+        )
     
     try:
+        db.query(UserCarona).filter(UserCarona.fk_carona == db_carona.id).delete()
         db.delete(db_carona)
         db.commit()
     except SQLAlchemyError as sqlae:
