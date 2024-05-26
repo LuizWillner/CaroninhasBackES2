@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.core.authentication import get_current_active_user
-from app.core.pedido_carona import get_pedido_carona_by_id
+from app.core.pedido_carona import get_pedido_carona_by_id, update_carona_from_pedido_carona_in_db
+from app.core.user_carona import add_user_carona_to_db
 from app.database.carona_orm import Carona
 from app.database.pedido_carona_orm import PedidoCarona
 from app.database.user_carona_orm import UserCarona
@@ -14,6 +15,7 @@ from app.database.veiculo_orm import MotoristaVeiculo
 
 from app.models.carona_oop import CaronaBase, CaronaBasePartidaDestino, CaronaExtended, CaronaUpdate, CaronaUpdatePartidaDestino
 
+from app.models.user_carona_oop import UserCaronaBase
 from app.utils.db_utils import apply_limit_offset, get_db
 from app.utils.carona_utils import CaronaOrderByOptions
 
@@ -56,11 +58,16 @@ def create_carona(
 
     Lança:
     - HTTPException com status code 404 (not found) se o veículo do motorista atual não for encontrado.
-    - HTTPException com status code 500 (internal server error) se houver um erro na hora de adicionar a carona no banco.
+    - HTTPException com status code 400 (bad request) se o número de vagas for menor que 1.
+    - HTTPException com status code 500 (internal server error) se houver um erro na hora de adicionar a carona no banco ou qualquer erro de lógica interna.
     '''
     
     if not motorista_veiculo:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Vehicle of current user with id {veiculo_id} not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Veículo id={veiculo_id} do usuário não encontrado.")
+    
+    if vagas < 1:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Número de vagas deve ser maior que 0.")
+    
     carona = add_carona_to_db(
         carona_to_add=CaronaBase(
             fk_motorista=motorista.id_fk_user,
@@ -302,39 +309,79 @@ def get_my_historico_as_passageiro(
     
     return caronas
 
+
 @router.post("/caronas/pedido/{pedido_carona_id}", response_model=CaronaExtended)
 def create_carona_from_pedido(
     pedido_carona: Annotated[PedidoCarona, Depends(get_pedido_carona_by_id)],
     db: Annotated[Session, Depends(get_db)], 
-    current_user: Annotated[User, Depends(get_current_active_user)],
-    veiculo_id: int = Query(),
+    current_motorista: Annotated[Motorista, Depends(get_current_active_motorista)],
+    motorista_veiculo: Annotated[MotoristaVeiculo, Depends(get_motorista_veiculo_of_user)],
+    veiculo_id: int,
     hora_de_partida: datetime = Query(),
     vagas: int = Query(),
 ) -> CaronaExtended:
+    """
+    Cria uma carona a partir de um pedido de carona.
+
+    Parâmetros:
+    - pedido_carona_id: ID do pedido de carona a ser atendido.
+    - veiculo_id: O ID do modelo do veículo a ser usado na carona.
+    - hora_de_partida: A hora de partida da carona. Deve respeitar o intervalo sugerido no pedido da carona.
+    - vagas: O número de vagas disponíveis na carona. Deve ser maior que 0.
+
+    Retorna:
+    - A carona criada.
+
+    Lança:
+    - HTTPException 404 (not found): Se o veículo do motorista não for encontrado.
+    - HTTPException 404 (not found): Se o pedido de carona não for encontrado.
+    - HTTPException 400 (bad request): Se o pedido de carona já tiver sido atendido.
+    - HTTPException 400 (bad request): Se o número de vagas for menor que 1.
+    - HTTPException 400 (bad request): Se a hora de partida não estiver dentro do intervalo sugerido no pedido de carona.
+    - HTTPException 500 (internal server error) se houver um erro na hora de adicionar algo no banco ou qualquer erro de lógica interna.
+    """
+    
+
+    if not motorista_veiculo:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Veículo id={veiculo_id} do usuário não encontrado.")
+    
     if not pedido_carona:
         raise HTTPException(status_code=404, detail="Pedido de carona não encontrado")
+    else:
+        if pedido_carona.fk_carona is not None:
+            raise HTTPException(status_code=400, detail="Pedido de carona já foi atendido.")
+    
+    if vagas < 1:
+        raise HTTPException(status_code=400, detail="Número de vagas deve ser maior que 0.")
 
     if hora_de_partida < pedido_carona.hora_partida_minima or hora_de_partida > pedido_carona.hora_partida_maxima:
         raise HTTPException(status_code=400, detail="Hora de partida deve respeitar o intervalo sugerido no pedido da carona.")
+    
+    db_carona = add_carona_to_db(
+        carona_to_add=CaronaBase(
+            local_partida=pedido_carona.local_partida,
+            local_destino=pedido_carona.local_destino,
+            fk_motorista=current_motorista.id_fk_user,
+            fk_motorista_veiculo=motorista_veiculo.id,
+            hora_partida=hora_de_partida,
+            valor=pedido_carona.valor,
+            vagas=vagas
+        ),
+        db=db
+    )
+    
+    db_user_carona = add_user_carona_to_db(
+        user_carona_to_add=UserCaronaBase(
+            fk_user=pedido_carona.fk_user,
+            fk_carona=db_carona.id
+        ),
+        db_carona=db_carona,
+        db=db
+    )
 
-    nova_carona = Carona(
-        hora_partida=hora_de_partida,
-        local_partida=pedido_carona.local_partida,
-        fk_motorista_veiculo=veiculo_id,
-        fk_motorista=current_user.id,
-        local_destino=pedido_carona.local_destino,
-        valor=pedido_carona.valor,
-        vagas=vagas
-    )
-    db.add(nova_carona)
-    db.commit()
-    db.refresh(nova_carona)
+    db_pedido_carona = update_carona_from_pedido_carona_in_db(
+        db=db,
+        db_pedido_carona=pedido_carona,
+        carona_id=db_carona.id)
     
-    user_carona = UserCarona(
-        fk_user=pedido_carona.fk_user,
-        fk_carona=nova_carona.id
-    )
-    db.add(user_carona)
-    db.commit()
-    
-    return nova_carona
+    return db_carona

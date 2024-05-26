@@ -26,7 +26,8 @@ from app.core.authentication import get_current_active_user
 from app.core.pedido_carona import (
     add_pedido_carona_to_db, 
     get_pedido_carona_by_id, 
-    get_pedido_caronas, 
+    get_pedido_caronas,
+    update_carona_from_pedido_carona_in_db, 
     update_pedido_carona_in_db, 
     delete_pedido_carona_from_db
 )
@@ -35,7 +36,7 @@ from app.core.pedido_carona import (
 router = APIRouter(prefix="/pedido-carona", tags=[RouterTags.pedido_carona])
 
 
-@router.post("", response_model=PedidoCaronaCreateWithDetail)
+@router.post("", response_model=PedidoCaronaExtended)
 def create_pedido_carona(
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
@@ -46,7 +47,7 @@ def create_pedido_carona(
     inserir_automatico: bool = Query(False, description="Indica se o sistema deve tentar inserir automaticamente o usuário em uma carona que atenda aos critérios do pedido. Se True, os params _keyword_partida_ e _keyword_destino_ devem ser fornecidos."),
     keyword_partida: str = Query(None, description="Caso _inserir_automatico_=True, o usuário será adicionado numa carona que contenha essa palavra chave no endereço de partida."),
     keyword_destino: str = Query(None, description="Caso _inserir_automatico_=True, o usuário será adicionado numa carona que contenha essa palavra chave no endereço de partida."),
-) -> PedidoCaronaCreateWithDetail:
+) -> PedidoCaronaExtended:
     if inserir_automatico and not (keyword_partida and keyword_destino):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -87,8 +88,6 @@ def create_pedido_carona(
                 .first()
             )
 
-            pedido_carona_model = PedidoCaronaCreate.from_orm(db_pedido_carona)
-            response_pedido_carona = PedidoCaronaCreateWithDetail(**pedido_carona_model.model_dump(), sucesso_insercao=False)
             if carona_escolhida:
                 db_user_carona = add_user_carona_to_db(
                     user_carona_to_add=UserCaronaBase(
@@ -99,7 +98,7 @@ def create_pedido_carona(
                     db=db
                 )
                 if db_user_carona:
-                    response_pedido_carona.sucesso_insercao = True
+                    update_carona_from_pedido_carona_in_db(db=db, db_pedido_carona=db_pedido_carona, carona_id=carona_escolhida.id)
                     
     except Exception as e:
         db.rollback()
@@ -111,7 +110,7 @@ def create_pedido_carona(
             detail=f"Erro ao tentar inserir automaticamente o usuário numa carona: {e}"
         )
 
-    return response_pedido_carona
+    return db_pedido_carona
 
 
 

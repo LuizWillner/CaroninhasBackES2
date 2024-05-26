@@ -35,6 +35,3 @@ class PedidoCaronaExtended(PedidoCaronaCreate):
     user: UserModel
     carona: CaronaExtended | None = None
     
-class PedidoCaronaCreateWithDetail(PedidoCaronaCreate):
-    sucesso_insercao: bool | None = None
-    
