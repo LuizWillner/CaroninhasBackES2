@@ -14,7 +14,7 @@ from app.database.pedido_carona_orm import PedidoCarona
 from app.models.router_tags import RouterTags
 from app.models.user_carona_oop import UserCaronaBase
 from app.models.pedido_carona_oop import (
-    PedidoCaronaBase, PedidoCaronaBasePartidaDestino, PedidoCaronaCreate, PedidoCaronaCreateWithDetail, 
+    PedidoCaronaBase, PedidoCaronaBasePartidaDestino, PedidoCaronaCreate, 
     PedidoCaronaUpdate, PedidoCaronaExtended
 )
 
