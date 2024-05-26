@@ -15,10 +15,11 @@ class PedidoCarona(Base):
     valor = Column(Float, index=True, nullable=False)
     local_partida = Column(String, index=True, nullable=False)
     local_destino = Column(String, index=True, nullable=False)
-    aceito = Column(Boolean, index=True, nullable=False, server_default=sql.false())
+    fk_carona = Column(Integer, ForeignKey("carona.id"), index=True, nullable=True)
     created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())
     
     user = relationship("User", lazy=True, uselist=False, back_populates="pedidos_de_caronas")
+    carona = relationship("Carona", lazy=True, uselist=False, back_populates="pedidos_de_caronas")
 
     
