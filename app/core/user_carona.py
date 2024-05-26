@@ -8,8 +8,12 @@ from app.database.user_carona_orm import UserCarona
 from app.models.user_carona_oop import UserCaronaBase, UserCaronaUpdate
 
 
-def add_user_carona_to_db(user_carona_to_add: UserCaronaBase, db: Session) -> UserCarona:
-    db_user_carona = UserCarona(**user_carona_to_add.dict())
+def add_user_carona_to_db(user_carona_to_add: UserCaronaBase, total_vagas_carona: int, db: Session) -> UserCarona:
+    vagas_preenchidas = db.query(UserCarona).filter(UserCarona.fk_carona == user_carona_to_add.fk_carona).count()
+    if vagas_preenchidas >= total_vagas_carona:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Carona já está lotada.")
+    
+    db_user_carona = UserCarona(**user_carona_to_add.model_dump())
     try:
         db.add(db_user_carona)
         db.commit()
