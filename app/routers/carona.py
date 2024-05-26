@@ -155,6 +155,14 @@ def search_caronas(
     return caronas
 
 
+@router.get("/{carona_id}", response_model=CaronaExtended)
+def read_carona_by_id(
+    carona: Annotated[Carona, Depends(get_carona_by_id)],
+    current_user: Annotated[User, Depends(get_current_active_user)]
+) -> CaronaExtended:
+    return carona
+
+
 @router.put("/{carona_id}", response_model=CaronaExtended)
 def update_carona(
     carona: Annotated[Carona, Depends(get_carona_by_id)],
