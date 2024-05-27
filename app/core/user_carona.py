@@ -4,12 +4,26 @@ import logging
 from fastapi import HTTPException, status
 from datetime import datetime
 
+from app.database.carona_orm import Carona
 from app.database.user_carona_orm import UserCarona
 from app.models.user_carona_oop import UserCaronaBase, UserCaronaUpdate
 
 
-def add_user_carona_to_db(user_carona_to_add: UserCaronaBase, db: Session) -> UserCarona:
-    db_user_carona = UserCarona(**user_carona_to_add.dict())
+def add_user_carona_to_db(user_carona_to_add: UserCaronaBase, db_carona: Carona, db: Session) -> UserCarona:
+    if db_carona.fk_motorista == user_carona_to_add.fk_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Motorista não pode se inscrever na própria carona."
+        )
+    
+    vagas_preenchidas = db.query(UserCarona).filter(UserCarona.fk_carona == user_carona_to_add.fk_carona).count()
+    if vagas_preenchidas >= db_carona.vagas:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Carona já está lotada."
+        )
+    
+    db_user_carona = UserCarona(**user_carona_to_add.model_dump())
     try:
         db.add(db_user_carona)
         db.commit()

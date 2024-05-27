@@ -13,12 +13,13 @@ class PedidoCarona(Base):
     hora_partida_minima = Column(DateTime, index=True, nullable=False)
     hora_partida_maxima = Column(DateTime, index=True, nullable=False)
     valor = Column(Float, index=True, nullable=False)
-    # coord_partida = Column(String, index=True, nullable=False)
-    # coord_destino = Column(String, index=True, nullable=False)
-    aceito = Column(Boolean, index=True, nullable=False, server_default=sql.false())
+    local_partida = Column(String, index=True, nullable=False)
+    local_destino = Column(String, index=True, nullable=False)
+    fk_carona = Column(Integer, ForeignKey("carona.id"), index=True, nullable=True)
     created_at = Column(DateTime, index=False, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.current_timestamp())
     
     user = relationship("User", lazy=True, uselist=False, back_populates="pedidos_de_caronas")
+    carona = relationship("Carona", lazy=True, uselist=False, back_populates="pedidos_de_caronas")
 
     

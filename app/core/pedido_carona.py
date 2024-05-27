@@ -22,14 +22,8 @@ def add_pedido_carona_to_db(
     pedido_carona_to_add: PedidoCaronaBase,
     db: Annotated[Session, Depends(get_db)]
 ) -> PedidoCarona:
-    db_pedido_carona = PedidoCarona(
-        fk_user = pedido_carona_to_add.fk_user,
-        hora_partida_minima = pedido_carona_to_add.hora_partida_minima,
-        hora_partida_maxima = pedido_carona_to_add.hora_partida_maxima,
-        valor=pedido_carona_to_add.valor,
-        # coord_partida = pedido_carona_to_add.coord_partida,
-        # coord_destino = pedido_carona_to_add.coord_destino,
-    )
+    db_pedido_carona = PedidoCarona(**pedido_carona_to_add.model_dump())
+    
     try:
         db.add(db_pedido_carona)
         db.commit()
@@ -41,7 +35,7 @@ def add_pedido_carona_to_db(
     return db_pedido_carona
 
 
-def get_pedido_carona_by_id(db: Session, pedido_carona_id: int) -> PedidoCarona:
+def get_pedido_carona_by_id(db: Annotated[Session, Depends(get_db)], pedido_carona_id: int) -> PedidoCarona:
     return db.query(PedidoCarona).filter(PedidoCarona.id == pedido_carona_id).first()
 
 
@@ -65,6 +59,20 @@ def update_pedido_carona_in_db(db: Session, pedido_carona_id: int, pedido_carona
         msg = f"Não foi possível atualizar o Pedido de Carona no banco: {sqlae}"
         logging.error(msg)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
+    
+    return db_pedido_carona
+
+
+def update_carona_from_pedido_carona_in_db(db: Session, db_pedido_carona: PedidoCarona, carona_id: int) -> PedidoCarona:
+    db_pedido_carona.fk_carona = carona_id
+    try:
+        db.commit()
+        db.refresh(db_pedido_carona)
+    except SQLAlchemyError as sqlae:
+        msg = f"Não foi possível atrelar o Pedido de Carona a uma Carona no banco: {sqlae}"
+        logging.error(msg)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
+    
     return db_pedido_carona
 
 
