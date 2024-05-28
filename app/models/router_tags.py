@@ -6,3 +6,4 @@ class RouterTags(enum.Enum):
     carona = "Carona"
     pedido_carona = "Pedido de Carona"
     user_carona = "Inscrição em Carona"
+    avaliacao= "Avalição da Carona"
