@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from app.models.carona_oop import CaronaExtended
 from app.models.user_oop import UserModel
 
 
@@ -9,6 +10,7 @@ class PedidoCaronaBasePartidaDestino(BaseModel):
 
 class PedidoCaronaBase(PedidoCaronaBasePartidaDestino):
     fk_user: int
+    fk_carona: int | None = None
     hora_partida_minima: datetime
     hora_partida_maxima: datetime
     valor: float
@@ -31,7 +33,5 @@ class PedidoCaronaUpdate(BaseModel):
 
 class PedidoCaronaExtended(PedidoCaronaCreate):
     user: UserModel
-    
-class PedidoCaronaCreateWithDetail(PedidoCaronaCreate):
-    sucesso_insercao: bool | None = None
+    carona: CaronaExtended | None = None
     

@@ -22,5 +22,5 @@ class Carona(Base):
     motorista = relationship("Motorista", lazy=True, uselist=False, back_populates="caronas")
     veiculo_do_motorista = relationship("MotoristaVeiculo", lazy=True, uselist=False, back_populates="caronas")
     passageiros = relationship("UserCarona", lazy=True, uselist=True, back_populates="carona")
-    
+    pedidos_de_caronas = relationship("PedidoCarona", lazy=True, uselist=True, back_populates="carona")
     

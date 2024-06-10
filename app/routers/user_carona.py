@@ -35,6 +35,7 @@ def add_me_to_carona(
             fk_user=current_user.id,
             fk_carona=carona_id,
         ),
+        db_carona=carona,
         db=db
     )
     return user_carona
