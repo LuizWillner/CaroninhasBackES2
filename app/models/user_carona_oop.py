@@ -18,7 +18,7 @@ class UserCaronaModel(UserCaronaBase):
     created_at: datetime
     updated_at: datetime
     nota_motorista: float | None = None
-    nota_pasageiro: float | None = None 
+    nota_passageiro: float | None = None 
     comentário_sobre_motorista: str | None = None 
     comentário_sobre_passageiro: str | None = None
     class Config:

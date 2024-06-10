@@ -40,10 +40,10 @@ def avaliar_passageiro(
     user_carona = db.query(UserCarona).filter(UserCarona.fk_carona == carona.id, UserCarona.fk_user == user_avaliado_id).first()
     if not user_carona:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado na carona.")
-    elif user_carona.nota_pasageiro or user_carona.comentário_sobre_passageiro:
+    elif user_carona.nota_passageiro or user_carona.comentário_sobre_passageiro:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Avaliação já foi feita.")
     
-    user_carona.nota_pasageiro = avaliacao.nota_passageiro
+    user_carona.nota_passageiro = avaliacao.nota_passageiro
     user_carona.comentário_sobre_passageiro = avaliacao.comentario_passageiro
     
     try:
