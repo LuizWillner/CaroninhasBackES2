@@ -13,9 +13,18 @@ class UserCaronaBase(BaseModel):
 class UserCaronaUpdate(UserCaronaBase):
     pass
 
-class UserCaronaWithUser(UserCaronaBase):
+class UserCaronaModel(UserCaronaBase):
     id: int
     created_at: datetime
+    updated_at: datetime
+    nota_motorista: float | None = None
+    nota_pasageiro: float | None = None 
+    comentário_sobre_motorista: str | None = None 
+    comentário_sobre_passageiro: str | None = None
+    class Config:
+        orm_mode = True
+
+class UserCaronaWithUser(UserCaronaModel):
     user: UserWithoutMotorista
     class Config:
         orm_mode = True
