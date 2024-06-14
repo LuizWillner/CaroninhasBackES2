@@ -10,7 +10,7 @@ class UserCarona(Base):
     fk_user = Column(Integer, ForeignKey('user.id'), index=True, nullable=False)
     fk_carona = Column(Integer, ForeignKey('carona.id'), index=True, nullable=False)
     nota_motorista = Column(Float, index=True,nullable=True)
-    nota_pasageiro = Column(Float,index= True, nullable=True)
+    nota_passageiro = Column(Float,index= True, nullable=True)
     comentário_sobre_motorista = Column(String,index=True, nullable=True)
     comentário_sobre_passageiro = Column(String, index=True, nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)

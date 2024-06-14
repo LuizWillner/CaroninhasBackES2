@@ -8,7 +8,7 @@ from app.routers import carona
 from app.routers import motorista
 from app.routers import veiculo
 from app.routers import user_carona
-
+from app.routers import avaliacao
 
 load_dotenv(dotenv_path="credentials.env")
 
@@ -31,7 +31,7 @@ app.include_router(motorista.router)
 app.include_router(veiculo.router)
 app.include_router(user_carona.router)
 app.include_router(pedido_carona.router)
-
+app.include_router(avaliacao.router)
 
 @app.get("/ping")
 def ping():
