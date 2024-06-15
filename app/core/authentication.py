@@ -60,8 +60,8 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_user_by_id(id: int, db: Session) -> User | None:
-    user_db: User = db.query(User).filter(User.id == id).first()
+def get_user_by_id(user_id: int, db: Annotated[Session, Depends(get_db)]) -> User | None:
+    user_db: User = db.query(User).filter(User.id == user_id).first()
     return user_db
         
         
@@ -132,7 +132,7 @@ def get_user(
     db: Annotated[Session, Depends(get_db)]
 ) -> User:
     
-    user = get_user_by_id(id=id, db=db)
+    user = get_user_by_id(user_id=id, db=db)
     if user is None:
         raise HTTPException(status_code=404, detail=f"User with id {id} not found")
     return user
