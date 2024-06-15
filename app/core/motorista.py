@@ -50,7 +50,7 @@ def add_motorista_to_db(
 def get_current_active_motorista(
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)]
-) -> Motorista:
+) -> Motorista | None:
     motorista: Motorista = (
         db.query(Motorista)
         .filter(Motorista.id_fk_user == current_user.id)
@@ -61,3 +61,15 @@ def get_current_active_motorista(
     
     return motorista
 
+
+def get_motorista_by_id(
+    motorista_id: int,
+    db: Annotated[Session, Depends(get_db)]
+) -> Motorista:
+    motorista: Motorista = (
+        db.query(Motorista)
+        .filter(Motorista.id_fk_user == motorista_id)
+        .first()
+    )
+    
+    return motorista

@@ -2,16 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import List, Annotated, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import exc
+from sqlalchemy import exc, func
 
-from app.core.motorista import get_current_active_motorista
+from app.core.motorista import get_current_active_motorista, get_motorista_by_id
 from app.utils.db_utils import get_db
-from app.core.authentication import get_current_active_user
+from app.core.authentication import get_current_active_user, get_user_by_id
 from app.database.user_carona_orm import UserCarona
 from app.database.carona_orm import Carona
 
 from app.models.user_carona_oop import UserCaronaModel, UserCaronaWithUser
-from app.models.avaliacao_opp import AvaliacaoMotorista, AvaliacaoPassageiro
+from app.models.avaliacao_opp import AvaliacaoMotorista, AvaliacaoPassageiro, AvaliacaoResponse
 
 
 from app.models.router_tags import RouterTags
@@ -86,3 +86,44 @@ def avaliar_motorista(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Erro ao criar avaliação sobre motorista id={motorista_avaliado_id}")
     
     return user_carona
+
+
+@router.get("/motorista/{motorista_id}", response_model=AvaliacaoResponse, description="Média da avaliação de motorista")
+def get_media_avaliacao_motorista(
+    motorista: Annotated[Motorista, Depends(get_motorista_by_id)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)]
+)-> AvaliacaoResponse:
+    if not motorista:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Motorista não encontrado.")
+    
+    nota_media = (
+        db.query(func.avg(UserCarona.nota_motorista))
+        .join(Carona, Carona.id == UserCarona.fk_carona)
+        .filter(Carona.fk_motorista == motorista.id_fk_user)
+        .scalar()
+    )
+    return AvaliacaoResponse(
+        id=motorista.id_fk_user,
+        nota_media=nota_media
+    )
+
+
+@router.get("/passageiro/{user_id}", response_model=AvaliacaoResponse, description="Média da avaliação de passageiro")
+def get_media_avaliacao_passageiro(
+    user: Annotated[User, Depends(get_user_by_id)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)]
+)-> AvaliacaoResponse:
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado.")
+    
+    nota_media = (
+        db.query(func.avg(UserCarona.nota_passageiro))
+        .filter(UserCarona.fk_user == user.id)
+        .scalar()
+    )
+    return AvaliacaoResponse(
+        id=user.id,
+        nota_media=nota_media
+    )
