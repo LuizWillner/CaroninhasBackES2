@@ -80,7 +80,7 @@ Projeto da disciplina Engenharia de Software 2 | Back-end | Universidade Federal
 10. **Para usuários do WSL**: No caso de ter instalado o **PostgreSQL no WSL** e o **Dbeaver no Windows**, basta preencher os dados de conexão do Dbeaver da forma descrita no item acima, como se o PostgreSQL estivesse no Windows (localhost pode ser usado para programas rodando no WSL que podem ser acessados do Windows). Talvez seja somente necessário permitir conexões TCP no WSL2 e reiniciar o postgres através dos comandos (Ubuntu):
 	```shell
 	>> sudo ufw allow 5432/tcp  # Deve aparecer algo como "Rules updated" e/ou "Rules updated (v6)"
-	>> sudo service postgresql restar
+	>> sudo service postgresql restart
 	```
 
 11. Terminando a configuração, criar um arquivo credentials.env para armazenar variáveis de ambiente e outras informações sensíveis. 
