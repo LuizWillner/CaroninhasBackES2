@@ -30,7 +30,7 @@ target_metadata = Base.metadata
 # ... etc.
 
 # Setting sqlalchemy.url param to value from envvar
-config.set_main_option("sqlalchemy.url", os.getenv("DB_URI"))
+config.set_main_option("sqlalchemy.url", os.getenv("SQLALCHEMY_DATABASE_URL"))
 
 
 def run_migrations_offline() -> None:

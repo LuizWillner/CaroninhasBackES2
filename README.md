@@ -90,9 +90,9 @@ Os artefatos do projeto -- como diagramas de projeto, documentos de requisitos, 
 
 11. Terminando a configuração, criar um arquivo credentials.env para armazenar variáveis de ambiente e outras informações sensíveis. 
 
-12. Adicionar variável de ambiente *DB_URI* em credentials.env contendo o link do database criado
+12. Adicionar variável de ambiente *SQLALCHEMY_DATABASE_URL* em credentials.env contendo o link do database criado
 	```
-	DB_URI=postgresql+psycopg2://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName
+	SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName
 	```
 
 8. Adicionar variável de ambiente *HASH_SECRET_KEY* em credentials.env contendo a chave usada para fazer o hash. Exemplo:
